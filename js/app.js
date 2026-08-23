@@ -86,6 +86,11 @@ function generateQuestion(op){
   else if(op === 'kurang'){ a=rand(5,20); b=rand(1,a); answer=a-b; }
   else if(op === 'kali'){ a=rand(2,5); b=rand(2,10); answer=a*b; }
   else { b=rand(2,9); const q=rand(2,9); a=b*q; answer=q; }
+=======
+  if(op === 'tambah'){ a=rand(1,1000); b=rand(1,1000); answer=a+b; }
+  else if(op === 'kurang'){ a=rand(1,200); b=rand(199,1); answer=a-b; }
+  else if(op === 'kali'){ a=rand(2,5); b=rand(2,5); answer=a*b; }
+  else { b=rand(2,100); const q=rand(2,100); a=b*q; answer=q; }
 >>>>>>> 76ce07bad2999952f7bbd8762b2709caa6a92eb5
   return { op, a, b, answer, isCustom:false };
 }
