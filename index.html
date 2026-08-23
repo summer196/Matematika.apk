@@ -237,13 +237,17 @@ async function fetchCustomQuestions(chosenOp){
 }
 
 async function generateRound(chosenOp){
-  const custom = await fetchCustomQuestions(chosenOp);
-  const procedural = [];
-  for(let i=0;i<14;i++) procedural.push(generateQuestion(chosenOp));
-  let pool = shuffle(custom.concat(procedural));
-  let round = pool.slice(0,10);
+  const custom = shuffle(await fetchCustomQuestions(chosenOp));
+
+  // Soal dari dashboard admin selalu diprioritaskan & selalu muncul.
+  if(custom.length >= 10){
+    return custom.slice(0,10);
+  }
+
+  // Kalau soal admin belum cukup 10, sisanya ditambal soal otomatis.
+  let round = custom.slice();
   while(round.length < 10) round.push(generateQuestion(chosenOp));
-  return round;
+  return shuffle(round);
 }
 
 /* ---------------- Visual renderers ---------------- */
