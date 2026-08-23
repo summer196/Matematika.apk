@@ -200,7 +200,7 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
     return;
   }
 
-  msg.textContent = 'Soal tersimpan! Langsung muncul di app adek lo 🎉';
+  msg.textContent = 'Soal tersimpan! Langsung muncul di app bidadari lo 🎉';
   msg.className = 'form-msg ok';
   document.getElementById('fQuestion').value = '';
   document.getElementById('fAnswer').value = '';
@@ -324,7 +324,7 @@ function effectiveStatus(item){
 function renderReview(){
   const wrap = document.getElementById('reviewWrap');
   if(allSubmissions.length === 0){
-    wrap.innerHTML = `<div class="empty-state">Belum ada jawaban yang masuk. Nanti otomatis muncul di sini pas adek main 🌱</div>`;
+    wrap.innerHTML = `<div class="empty-state">Belum ada jawaban yang masuk. Nanti otomatis muncul di sini pas bidadari main 🌱</div>`;
     return;
   }
   const sessions = groupBySession(allSubmissions);
@@ -336,13 +336,13 @@ function renderReview(){
       return `
         <div class="review-item" data-item-id="${item.id}">
           <div class="ri-q">${escapeHtml(item.question_text)}</div>
-          <div class="ri-ans">Jawaban adek: <b>${escapeHtml(item.student_answer ?? '-')}</b> &nbsp;·&nbsp; Jawaban benar: <b>${escapeHtml(item.correct_answer ?? '-')}</b></div>
+          <div class="ri-ans">Jawaban bidadari: <b>${escapeHtml(item.student_answer ?? '-')}</b> &nbsp;·&nbsp; Jawaban benar: <b>${escapeHtml(item.correct_answer ?? '-')}</b></div>
           <div class="review-actions">
             <button class="status-btn benar ${st==='benar'?'active':''}" data-action="mark" data-status="benar" data-id="${item.id}">✓ Benar</button>
             <button class="status-btn salah ${st==='salah'?'active':''}" data-action="mark" data-status="salah" data-id="${item.id}">✗ Salah</button>
           </div>
           <div class="review-note-row">
-            <textarea placeholder="Catatan buat adek (opsional)" data-note-id="${item.id}">${escapeHtml(item.admin_note || '')}</textarea>
+            <textarea placeholder="Catatan buat bidadari (opsional)" data-note-id="${item.id}">${escapeHtml(item.admin_note || '')}</textarea>
             <button data-action="save-note" data-id="${item.id}">Simpan</button>
           </div>
         </div>
@@ -351,11 +351,14 @@ function renderReview(){
 
     return `
       <div class="session-card ${isOpen?'open':''}" data-session="${sess.session_id}">
-        <div class="session-header" data-action="toggle-session" data-session="${sess.session_id}">
-          <span class="s-op">${OP_LABEL_REVIEW[sess.operation] || sess.operation || '-'}</span>
-          <span class="s-date">${formatDateAdmin(sess.date)}</span>
-          <span class="s-score">${benarCount}/${sess.items.length}</span>
-          <span class="chevron">▼</span>
+        <div class="session-header">
+          <div data-action="toggle-session" data-session="${sess.session_id}" style="display:flex; align-items:center; gap:10px; flex:1; min-width:0; cursor:pointer;">
+            <span class="s-op">${OP_LABEL_REVIEW[sess.operation] || sess.operation || '-'}</span>
+            <span class="s-date">${formatDateAdmin(sess.date)}</span>
+            <span class="s-score">${benarCount}/${sess.items.length}</span>
+            <span class="chevron">▼</span>
+          </div>
+          <button class="status-btn" data-action="delete-session" data-session="${sess.session_id}" style="background:#FFEDEB; color:var(--coral-dark); flex-shrink:0;">🗑️</button>
         </div>
         <div class="session-body">${itemsHtml}</div>
       </div>
@@ -369,6 +372,9 @@ function renderReview(){
       renderReview();
     });
   });
+  wrap.querySelectorAll('[data-action="delete-session"]').forEach(btn => {
+    btn.addEventListener('click', () => deleteSession(btn.dataset.session));
+  });
   wrap.querySelectorAll('[data-action="mark"]').forEach(btn => {
     btn.addEventListener('click', () => setAdminStatus(btn.dataset.id, btn.dataset.status));
   });
@@ -376,6 +382,34 @@ function renderReview(){
     btn.addEventListener('click', () => saveNote(btn.dataset.id));
   });
 }
+
+async function deleteSession(sessionId){
+  if(!confirm('Hapus semua jawaban di sesi ini? Gak bisa dibalikin lagi.')) return;
+  const { error } = await sb.from('submissions').delete().eq('session_id', sessionId);
+  if(error){ alert('Gagal hapus: ' + error.message); return; }
+  allSubmissions = allSubmissions.filter(x => x.session_id !== sessionId);
+  delete openSessions[sessionId];
+  renderReview();
+}
+
+document.getElementById('clearAllReviewBtn').addEventListener('click', async () => {
+  if(allSubmissions.length === 0){ alert('Belum ada riwayat jawaban buat dihapus.'); return; }
+  const step1 = confirm(`Yakin mau hapus SEMUA riwayat jawaban (${allSubmissions.length} jawaban dari semua sesi)? Ini gak kepengaruh ke soal-soal yang lo bikin, cuma riwayat jawaban bidadari doang.`);
+  if(!step1) return;
+  const typed = prompt('Ketik HAPUS (huruf besar semua) buat konfirmasi:');
+  if(typed !== 'HAPUS'){ alert('Dibatalkan.'); return; }
+  const btn = document.getElementById('clearAllReviewBtn');
+  btn.disabled = true;
+  btn.textContent = 'Menghapus...';
+  const { error } = await sb.from('submissions').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+  btn.disabled = false;
+  btn.textContent = '🗑️ Hapus Semua Riwayat';
+  if(error){ alert('Gagal hapus semua: ' + error.message); return; }
+  allSubmissions = [];
+  openSessions = {};
+  renderReview();
+  alert('Semua riwayat jawaban udah dikosongin.');
+});
 
 async function setAdminStatus(id, status){
   const { error } = await sb.from('submissions').update({ admin_status: status }).eq('id', id);
