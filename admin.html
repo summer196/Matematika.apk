@@ -7,127 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase-config.js"></script>
-<style>
-  :root{
-    --leaf:#4CAF7D; --leaf-dark:#379563;
-    --coral:#FF6B5B; --coral-dark:#E14C3C;
-    --berry:#8B6FCB; --berry-dark:#6F52AE;
-    --sun-dark:#E8A317;
-    --ink:#2B3A55; --ink-soft:#5A6B8C;
-    --bg:#F4F7FB; --card:#FFFFFF; --line:#E4EAF3;
-  }
-  *{box-sizing:border-box;}
-  body{
-    margin:0; font-family:'Nunito',sans-serif; background:var(--bg); color:var(--ink);
-    -webkit-font-smoothing:antialiased;
-  }
-  h1,h2,h3{font-family:'Baloo 2',sans-serif; margin:0;}
-  button, select, input, textarea{font-family:inherit;}
-  button:focus-visible, input:focus-visible, select:focus-visible{outline:3px solid var(--berry); outline-offset:2px;}
-
-  /* ---- PIN gate ---- */
-  #pinGate{
-    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;
-  }
-  .pin-card{
-    background:var(--card); border-radius:22px; padding:32px 26px; width:100%; max-width:340px;
-    box-shadow:0 10px 30px rgba(43,58,85,0.12); text-align:center;
-  }
-  .pin-card .icon{font-size:40px; margin-bottom:10px;}
-  .pin-card h1{font-size:22px; margin-bottom:6px;}
-  .pin-card p{color:var(--ink-soft); font-size:14px; margin:0 0 18px; font-weight:600;}
-  .pin-card input{
-    width:100%; padding:14px; border-radius:14px; border:2px solid var(--line); font-size:20px;
-    text-align:center; letter-spacing:4px; margin-bottom:12px;
-  }
-  .pin-card button{
-    width:100%; padding:13px; border:none; border-radius:14px; background:var(--ink); color:#fff;
-    font-weight:800; font-size:15px; box-shadow:0 4px 0 #16233d;
-  }
-  .pin-error{color:var(--coral-dark); font-size:13px; font-weight:700; margin-top:10px; display:none;}
-
-  /* ---- Dashboard shell ---- */
-  #dashboard{display:none; max-width:920px; margin:0 auto; padding:26px 18px 60px;}
-  .dash-header{display:flex; align-items:center; gap:12px; margin-bottom:22px; flex-wrap:wrap;}
-  .dash-header .icon{font-size:30px;}
-  .dash-header h1{font-size:24px;}
-  .dash-header .sub{color:var(--ink-soft); font-weight:700; font-size:14px; width:100%;}
-  .dash-header a.back-link{margin-left:auto; font-size:13px; font-weight:800; color:var(--berry-dark); text-decoration:none;}
-
-  .stats-row{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:22px;}
-  .stat-box{
-    background:var(--card); border-radius:16px; padding:16px; box-shadow:0 2px 0 var(--line);
-  }
-  .stat-box .num{font-family:'Baloo 2',sans-serif; font-size:26px; color:var(--berry-dark);}
-  .stat-box .lbl{font-size:12.5px; color:var(--ink-soft); font-weight:700; margin-top:2px;}
-
-  .panel{
-    background:var(--card); border-radius:20px; padding:22px; box-shadow:0 2px 0 var(--line); margin-bottom:22px;
-  }
-  .panel h2{font-size:17px; margin-bottom:16px;}
-
-  .form-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
-  .form-grid .full{grid-column:1 / -1;}
-  label{display:block; font-size:12.5px; font-weight:800; color:var(--ink-soft); margin-bottom:5px;}
-  input[type=text], input[type=number], select, textarea{
-    width:100%; padding:11px 12px; border-radius:12px; border:2px solid var(--line); font-size:14.5px; color:var(--ink);
-  }
-  textarea{resize:vertical; min-height:44px;}
-  .field{margin-bottom:12px;}
-
-  .submit-btn{
-    padding:13px 20px; border:none; border-radius:14px; background:var(--leaf); color:#fff;
-    font-weight:800; font-size:15px; box-shadow:0 4px 0 var(--leaf-dark); margin-top:4px;
-  }
-  .submit-btn:active{transform:translateY(2px); box-shadow:0 2px 0 var(--leaf-dark);}
-  .submit-btn:disabled{background:#B7C0D1; box-shadow:0 4px 0 #9aa5ba;}
-  .form-msg{font-size:13px; font-weight:700; margin-top:10px; display:none;}
-  .form-msg.ok{color:var(--leaf-dark); display:block;}
-  .form-msg.err{color:var(--coral-dark); display:block;}
-
-  .filter-row{display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;}
-  .filter-row button{
-    padding:8px 14px; border-radius:999px; border:2px solid var(--line); background:#fff;
-    font-weight:800; font-size:13px; color:var(--ink-soft);
-  }
-  .filter-row button.active{background:var(--berry); border-color:var(--berry); color:#fff;}
-
-  table{width:100%; border-collapse:collapse;}
-  thead th{
-    text-align:left; font-size:12px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.4px;
-    padding:8px 10px; border-bottom:2px solid var(--line);
-  }
-  tbody td{padding:10px; border-bottom:1px solid var(--line); font-size:14px; vertical-align:top;}
-  tbody tr:last-child td{border-bottom:none;}
-  .op-pill{
-    display:inline-block; padding:3px 10px; border-radius:999px; font-size:11.5px; font-weight:800; color:#fff;
-  }
-  .op-pill.tambah{background:var(--leaf);}
-  .op-pill.kurang{background:var(--coral);}
-  .op-pill.kali{background:var(--berry);}
-  .op-pill.bagi{background:var(--sun-dark);}
-  .row-actions{display:flex; gap:6px; flex-wrap:wrap;}
-  .row-actions button{
-    border:none; border-radius:10px; padding:6px 10px; font-size:12px; font-weight:800; cursor:pointer;
-  }
-  .btn-toggle{background:#EEF2FA; color:var(--ink-soft);}
-  .btn-toggle.is-active{background:#E7F7EE; color:var(--leaf-dark);}
-  .btn-delete{background:#FFEDEB; color:var(--coral-dark);}
-  .empty-state{text-align:center; padding:30px 10px; color:var(--ink-soft); font-weight:700;}
-  .loading-line{text-align:center; padding:20px; color:var(--ink-soft); font-weight:700;}
-
-  @media (max-width:560px){
-    .form-grid{grid-template-columns:1fr;}
-    .stats-row{grid-template-columns:1fr 1fr;}
-    table, thead, tbody, tr, td{display:block;}
-    thead{display:none;}
-    tbody tr{padding:12px 4px; border-bottom:1px solid var(--line);}
-    tbody td{border-bottom:none; padding:4px;}
-    tbody td::before{content:attr(data-label); display:block; font-size:11px; font-weight:800; color:var(--ink-soft); margin-bottom:2px;}
-  }
-</style>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/admin.css">
 </head>
 <body>
 
@@ -186,9 +67,9 @@
   </div>
 
   <div class="panel">
-    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
-      <h2 style="margin-bottom:0;">📋 Daftar soal</h2>
-      <button id="resetAllBtn" style="border:none; border-radius:12px; padding:8px 14px; background:#FFEDEB; color:var(--coral-dark); font-weight:800; font-size:13px;">🗑️ Kosongkan Semua Soal</button>
+    <div class="panel-header-row">
+      <h2>📋 Daftar soal</h2>
+      <button id="resetAllBtn" class="reset-btn">🗑️ Kosongkan Semua Soal</button>
     </div>
     <div class="filter-row" id="filterRow">
       <button class="active" data-filter="semua">Semua</button>
@@ -201,205 +82,41 @@
   </div>
 </div>
 
-<script>
-let sb = null;
-try{
-  if(typeof SUPABASE_URL !== 'undefined' && SUPABASE_URL.indexOf('GANTI-DENGAN') === -1){
-    sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  }
-}catch(e){ console.warn(e); }
+<!-- Modal Koreksi (edit soal) -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal-box">
+    <h2>✏️ Koreksi Soal</h2>
+    <div class="field">
+      <label>Kategori</label>
+      <select id="eOperation">
+        <option value="tambah">Tambah</option>
+        <option value="kurang">Kurang</option>
+        <option value="kali">Kali</option>
+        <option value="bagi">Bagi</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Teks soal</label>
+      <input type="text" id="eQuestion">
+    </div>
+    <div class="field">
+      <label>Jawaban (angka)</label>
+      <input type="number" id="eAnswer">
+    </div>
+    <div class="field">
+      <label>Catatan visual (opsional)</label>
+      <textarea id="eNote"></textarea>
+    </div>
+    <div class="form-msg" id="editMsg"></div>
+    <div class="modal-actions">
+      <button class="modal-cancel-btn" id="editCancelBtn">Batal</button>
+      <button class="submit-btn" id="editSaveBtn">Simpan Perubahan</button>
+    </div>
+  </div>
+</div>
 
-let allQuestions = [];
-let currentFilter = 'semua';
-
-/* ---------------- PIN gate ---------------- */
-const pinInput = document.getElementById('pinInput');
-const pinError = document.getElementById('pinError');
-
-function tryUnlock(){
-  const val = pinInput.value.trim();
-  if(typeof ADMIN_PIN !== 'undefined' && val === String(ADMIN_PIN)){
-    document.getElementById('pinGate').style.display = 'none';
-    document.getElementById('dashboard').style.display = 'block';
-    loadQuestions();
-  } else {
-    pinError.style.display = 'block';
-    pinInput.value = '';
-    pinInput.focus();
-  }
-}
-document.getElementById('pinSubmit').addEventListener('click', tryUnlock);
-pinInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') tryUnlock(); });
-pinInput.focus();
-
-/* ---------------- Data ---------------- */
-async function loadQuestions(){
-  if(!sb){
-    document.getElementById('tableWrap').innerHTML = `<div class="empty-state">Supabase belum dikonfigurasi di supabase-config.js.</div>`;
-    return;
-  }
-  const { data, error } = await sb.from('custom_questions').select('*').order('created_at', {ascending:false});
-  if(error){
-    document.getElementById('tableWrap').innerHTML = `<div class="empty-state">Gagal memuat soal: ${escapeHtml(error.message)}</div>`;
-    return;
-  }
-  allQuestions = data || [];
-  renderStats();
-  renderTable();
-}
-
-function renderStats(){
-  document.getElementById('statTotal').textContent = allQuestions.length;
-  document.getElementById('statActive').textContent = allQuestions.filter(q => q.is_active).length;
-  document.getElementById('statInactive').textContent = allQuestions.filter(q => !q.is_active).length;
-}
-
-function escapeHtml(str){
-  const d = document.createElement('div');
-  d.textContent = str;
-  return d.innerHTML;
-}
-
-const OP_LABEL = {tambah:'Tambah', kurang:'Kurang', kali:'Kali', bagi:'Bagi'};
-
-function renderTable(){
-  const wrap = document.getElementById('tableWrap');
-  const filtered = currentFilter === 'semua' ? allQuestions : allQuestions.filter(q => q.operation === currentFilter);
-  if(filtered.length === 0){
-    wrap.innerHTML = `<div class="empty-state">Belum ada soal di kategori ini. Tambahin dari form di atas ya 🌱</div>`;
-    return;
-  }
-  const rows = filtered.map(q => `
-    <tr data-id="${q.id}">
-      <td data-label="Kategori"><span class="op-pill ${q.operation}">${OP_LABEL[q.operation] || q.operation}</span></td>
-      <td data-label="Soal">${escapeHtml(q.question_text)}</td>
-      <td data-label="Jawaban"><b>${escapeHtml(String(q.answer))}</b></td>
-      <td data-label="Aksi">
-        <div class="row-actions">
-          <button class="btn-toggle ${q.is_active ? 'is-active':''}" data-action="toggle" data-id="${q.id}">${q.is_active ? '✓ Aktif':'Nonaktif'}</button>
-          <button class="btn-delete" data-action="delete" data-id="${q.id}">Hapus</button>
-        </div>
-      </td>
-    </tr>
-  `).join('');
-
-  wrap.innerHTML = `
-    <table>
-      <thead><tr><th>Kategori</th><th>Soal</th><th>Jawaban</th><th>Aksi</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-  `;
-
-  wrap.querySelectorAll('[data-action="toggle"]').forEach(btn => {
-    btn.addEventListener('click', () => toggleActive(btn.dataset.id));
-  });
-  wrap.querySelectorAll('[data-action="delete"]').forEach(btn => {
-    btn.addEventListener('click', () => deleteQuestion(btn.dataset.id));
-  });
-}
-
-async function toggleActive(id){
-  const q = allQuestions.find(x => x.id === id);
-  if(!q) return;
-  const { error } = await sb.from('custom_questions').update({ is_active: !q.is_active }).eq('id', id);
-  if(error){ alert('Gagal ubah status: ' + error.message); return; }
-  q.is_active = !q.is_active;
-  renderStats();
-  renderTable();
-}
-
-async function deleteQuestion(id){
-  if(!confirm('Yakin mau hapus soal ini?')) return;
-  const { error } = await sb.from('custom_questions').delete().eq('id', id);
-  if(error){ alert('Gagal hapus: ' + error.message); return; }
-  allQuestions = allQuestions.filter(x => x.id !== id);
-  renderStats();
-  renderTable();
-}
-
-document.getElementById('resetAllBtn').addEventListener('click', async () => {
-  if(allQuestions.length === 0){
-    alert('Belum ada soal buat dihapus.');
-    return;
-  }
-  const step1 = confirm(`Yakin mau hapus SEMUA ${allQuestions.length} soal custom? Soal otomatis (generate) gak kepengaruh, cuma soal yang lo tambahin manual yang bakal hilang.`);
-  if(!step1) return;
-  const typed = prompt('Buat konfirmasi, ketik HAPUS (huruf besar semua):');
-  if(typed !== 'HAPUS'){
-    alert('Dibatalkan, gak jadi dihapus.');
-    return;
-  }
-  const btn = document.getElementById('resetAllBtn');
-  btn.disabled = true;
-  btn.textContent = 'Menghapus...';
-  const { error } = await sb.from('custom_questions').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-  btn.disabled = false;
-  btn.textContent = '🗑️ Kosongkan Semua Soal';
-  if(error){
-    alert('Gagal hapus semua: ' + error.message);
-    return;
-  }
-  allQuestions = [];
-  renderStats();
-  renderTable();
-  alert('Semua soal custom udah dikosongin.');
-});
-
-document.getElementById('filterRow').addEventListener('click', (e) => {
-  const btn = e.target.closest('button[data-filter]');
-  if(!btn) return;
-  document.querySelectorAll('#filterRow button').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  currentFilter = btn.dataset.filter;
-  renderTable();
-});
-
-/* ---------------- Add question form ---------------- */
-document.getElementById('submitBtn').addEventListener('click', async () => {
-  const operation = document.getElementById('fOperation').value;
-  const answer = document.getElementById('fAnswer').value.trim();
-  const question_text = document.getElementById('fQuestion').value.trim();
-  const note = document.getElementById('fNote').value.trim();
-  const msg = document.getElementById('formMsg');
-
-  if(!question_text || answer === '' || isNaN(Number(answer))){
-    msg.textContent = 'Isi teks soal dan jawaban (angka) dulu ya.';
-    msg.className = 'form-msg err';
-    return;
-  }
-  if(!sb){
-    msg.textContent = 'Supabase belum dikonfigurasi.';
-    msg.className = 'form-msg err';
-    return;
-  }
-
-  const submitBtn = document.getElementById('submitBtn');
-  submitBtn.disabled = true;
-  submitBtn.textContent = 'Menyimpan...';
-
-  const { data, error } = await sb.from('custom_questions').insert([{
-    operation, question_text, answer: Number(answer), note: note || null, is_active: true
-  }]).select();
-
-  submitBtn.disabled = false;
-  submitBtn.textContent = 'Simpan Soal';
-
-  if(error){
-    msg.textContent = 'Gagal simpan: ' + error.message;
-    msg.className = 'form-msg err';
-    return;
-  }
-
-  msg.textContent = 'Soal tersimpan! Langsung muncul di app adek lo 🎉';
-  msg.className = 'form-msg ok';
-  document.getElementById('fQuestion').value = '';
-  document.getElementById('fAnswer').value = '';
-  document.getElementById('fNote').value = '';
-
-  if(data && data[0]) allQuestions.unshift(data[0]);
-  renderStats();
-  renderTable();
-});
-</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/admin.js"></script>
 </body>
 </html>

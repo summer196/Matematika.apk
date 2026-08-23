@@ -1,0 +1,122 @@
+/* ============================================================
+   ADMIN.CSS — tampilan khusus halaman admin.html (dashboard)
+   ============================================================ */
+
+body{ background:#F4F7FB; }
+
+/* ---- PIN gate ---- */
+#pinGate{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+.pin-card{
+  background:var(--card); border-radius:22px; padding:32px 26px; width:100%; max-width:340px;
+  box-shadow:0 10px 30px rgba(43,58,85,0.12); text-align:center;
+}
+.pin-card .icon{font-size:40px; margin-bottom:10px;}
+.pin-card h1{font-size:22px; margin-bottom:6px;}
+.pin-card p{color:var(--ink-soft); font-size:14px; margin:0 0 18px; font-weight:600;}
+.pin-card input{
+  width:100%; padding:14px; border-radius:14px; border:2px solid var(--line); font-size:20px;
+  text-align:center; letter-spacing:4px; margin-bottom:12px;
+}
+.pin-card button{
+  width:100%; padding:13px; border:none; border-radius:14px; background:var(--ink); color:#fff;
+  font-weight:800; font-size:15px; box-shadow:0 4px 0 #16233d;
+}
+.pin-error{color:var(--coral-dark); font-size:13px; font-weight:700; margin-top:10px; display:none;}
+
+/* ---- Dashboard shell ---- */
+#dashboard{display:none; max-width:920px; margin:0 auto; padding:26px 18px 60px;}
+.dash-header{display:flex; align-items:center; gap:12px; margin-bottom:22px; flex-wrap:wrap;}
+.dash-header .icon{font-size:30px;}
+.dash-header h1{font-size:24px;}
+.dash-header .sub{color:var(--ink-soft); font-weight:700; font-size:14px; width:100%;}
+.dash-header a.back-link{margin-left:auto; font-size:13px; font-weight:800; color:var(--berry-dark); text-decoration:none;}
+
+.stats-row{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:22px;}
+.stat-box{background:var(--card); border-radius:16px; padding:16px; box-shadow:0 2px 0 var(--line);}
+.stat-box .num{font-family:'Baloo 2',sans-serif; font-size:26px; color:var(--berry-dark);}
+.stat-box .lbl{font-size:12.5px; color:var(--ink-soft); font-weight:700; margin-top:2px;}
+
+.panel{background:var(--card); border-radius:20px; padding:22px; box-shadow:0 2px 0 var(--line); margin-bottom:22px;}
+.panel h2{font-size:17px; margin-bottom:16px;}
+.panel-header-row{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:16px;}
+.panel-header-row h2{margin-bottom:0;}
+
+.form-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+.form-grid .full{grid-column:1 / -1;}
+label{display:block; font-size:12.5px; font-weight:800; color:var(--ink-soft); margin-bottom:5px;}
+input[type=text], input[type=number], select, textarea{
+  width:100%; padding:11px 12px; border-radius:12px; border:2px solid var(--line); font-size:14.5px; color:var(--ink);
+}
+textarea{resize:vertical; min-height:44px;}
+.field{margin-bottom:12px;}
+
+.submit-btn{
+  padding:13px 20px; border:none; border-radius:14px; background:var(--leaf); color:#fff;
+  font-weight:800; font-size:15px; box-shadow:0 4px 0 var(--leaf-dark); margin-top:4px;
+}
+.submit-btn:active{transform:translateY(2px); box-shadow:0 2px 0 var(--leaf-dark);}
+.submit-btn:disabled{background:#B7C0D1; box-shadow:0 4px 0 #9aa5ba;}
+.form-msg{font-size:13px; font-weight:700; margin-top:10px; display:none;}
+.form-msg.ok{color:var(--leaf-dark); display:block;}
+.form-msg.err{color:var(--coral-dark); display:block;}
+
+.reset-btn{
+  border:none; border-radius:12px; padding:8px 14px; background:#FFEDEB; color:var(--coral-dark);
+  font-weight:800; font-size:13px;
+}
+
+.filter-row{display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;}
+.filter-row button{
+  padding:8px 14px; border-radius:999px; border:2px solid var(--line); background:#fff;
+  font-weight:800; font-size:13px; color:var(--ink-soft);
+}
+.filter-row button.active{background:var(--berry); border-color:var(--berry); color:#fff;}
+
+table{width:100%; border-collapse:collapse;}
+thead th{
+  text-align:left; font-size:12px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.4px;
+  padding:8px 10px; border-bottom:2px solid var(--line);
+}
+tbody td{padding:10px; border-bottom:1px solid var(--line); font-size:14px; vertical-align:top;}
+tbody tr:last-child td{border-bottom:none;}
+.op-pill{display:inline-block; padding:3px 10px; border-radius:999px; font-size:11.5px; font-weight:800; color:#fff;}
+.op-pill.tambah{background:var(--leaf);}
+.op-pill.kurang{background:var(--coral);}
+.op-pill.kali{background:var(--berry);}
+.op-pill.bagi{background:var(--sun-dark);}
+.row-actions{display:flex; gap:6px; flex-wrap:wrap;}
+.row-actions button{border:none; border-radius:10px; padding:6px 10px; font-size:12px; font-weight:800; cursor:pointer;}
+.btn-toggle{background:#EEF2FA; color:var(--ink-soft);}
+.btn-toggle.is-active{background:#E7F7EE; color:var(--leaf-dark);}
+.btn-edit{background:#EAF0FF; color:var(--berry-dark);}
+.btn-delete{background:#FFEDEB; color:var(--coral-dark);}
+.empty-state{text-align:center; padding:30px 10px; color:var(--ink-soft); font-weight:700;}
+.loading-line{text-align:center; padding:20px; color:var(--ink-soft); font-weight:700;}
+
+/* ---- Edit modal (fitur koreksi) ---- */
+.modal-overlay{
+  display:none; position:fixed; inset:0; background:rgba(43,58,85,0.45);
+  align-items:center; justify-content:center; padding:20px; z-index:50;
+}
+.modal-overlay.show{display:flex;}
+.modal-box{
+  background:var(--card); border-radius:22px; padding:24px; width:100%; max-width:460px;
+  max-height:90vh; overflow-y:auto; box-shadow:0 12px 40px rgba(43,58,85,0.25);
+}
+.modal-box h2{font-size:18px; margin-bottom:16px;}
+.modal-actions{display:flex; gap:10px; margin-top:6px;}
+.modal-actions .submit-btn{flex:1; margin-top:0;}
+.modal-cancel-btn{
+  flex:1; padding:13px 20px; border:none; border-radius:14px; background:#EEF2FA; color:var(--ink-soft);
+  font-weight:800; font-size:15px;
+}
+
+@media (max-width:560px){
+  .form-grid{grid-template-columns:1fr;}
+  .stats-row{grid-template-columns:1fr 1fr;}
+  table, thead, tbody, tr, td{display:block;}
+  thead{display:none;}
+  tbody tr{padding:12px 4px; border-bottom:1px solid var(--line);}
+  tbody td{border-bottom:none; padding:4px;}
+  tbody td::before{content:attr(data-label); display:block; font-size:11px; font-weight:800; color:var(--ink-soft); margin-bottom:2px;}
+}
