@@ -58,8 +58,8 @@ const OP_LABELS = {
 };
 const ALL_OPS = ['tambah','kurang','kali','bagi','campur'];
 
-const ENCOURAGE_RIGHT = ['Wah pinter banget!', 'Betul sekali!', 'Keren, lanjut lagi!', 'Mantap!', 'Tepat sekali!'];
-const ENCOURAGE_WRONG = ['Yuk coba lagi ya!', 'Hampir benar, semangat!', 'Gak apa-apa, kita belajar lagi!', 'Ayo dihitung pelan-pelan!'];
+const ENCOURAGE_RIGHT = ['Pinternyaa sayangggkuu!', 'Betul sekali sayanggg!', 'Keren, lanjutin sayanggg!', 'Mantap sayangg!', 'Nice bidadarikuu!'];
+const ENCOURAGE_WRONG = ['Yuk coba lagi yuk sayangg!', 'Hampir sayanggg, cuba agi!', 'Gapapaa, kita belajar lagi okeii?', 'Pelan pelan yu!!'];
 
 function rand(min, max){ return Math.floor(Math.random()*(max-min+1))+min; }
 function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
@@ -74,10 +74,10 @@ function escapeHtml(str){
 function generateQuestion(op){
   if(op === 'campur') op = pick(['tambah','kurang','kali','bagi']);
   let a,b,answer;
-  if(op === 'tambah'){ a=rand(1,10); b=rand(1,10); answer=a+b; }
-  else if(op === 'kurang'){ a=rand(5,20); b=rand(1,a); answer=a-b; }
-  else if(op === 'kali'){ a=rand(2,9); b=rand(2,9); answer=a*b; }
-  else { b=rand(2,9); const q=rand(2,9); a=b*q; answer=q; }
+  if(op === 'tambah'){ a=rand(1,1000); b=rand(1,1000); answer=a+b; }
+  else if(op === 'kurang'){ a=rand(1,1000); b=rand(1000,a); answer=a-b; }
+  else if(op === 'kali'){ a=rand(2,100); b=rand(2,100); answer=a*b; }
+  else { b=rand(2,100); const q=rand(2,100); a=b*q; answer=q; }
   return { op, a, b, answer, isCustom:false };
 }
 
@@ -212,10 +212,10 @@ function mainHtml(){
 /* ---------------- Home ---------------- */
 function homeScreen(){
   return `
-    <div class="brand"><span class="mascot">🐰</span><h1>Kebun Angka</h1><div class="stars">⭐ ${totalStars}</div></div>
-    <div class="subtitle">Ayo berhitung sambil main di kebun buah!</div>
+    <div class="brand"><span class="mascot">🐰</span><h1>Matematika untuk Bidadariku</h1><div class="stars">⭐ ${totalStars}</div></div>
+    <div class="subtitle">Ayo belajar berhitung bareng chocolove</div>
     <div class="card">
-      <h2 style="font-size:18px;">Pilih materi</h2>
+      <h2 style="font-size:18px;">Pilih materinya yu</h2>
       <div class="op-grid">
         <button class="op-card" data-op="tambah"><span class="sym">+</span>Tambah</button>
         <button class="op-card" data-op="kurang"><span class="sym">−</span>Kurang</button>
@@ -233,7 +233,7 @@ function homeScreen(){
 function quizScreen(){
   if(state.loading){
     return `
-      <div class="brand"><span class="mascot">🐰</span><h1 style="font-size:20px;">Kebun Angka</h1><div class="stars">⭐ ${totalStars}</div></div>
+      <div class="brand"><span class="mascot">🐰</span><h1 style="font-size:20px;">Matematika Dasar</h1><div class="stars">⭐ ${totalStars}</div></div>
       <div class="card"><div class="loading-line">Menyiapkan soal... 🌱</div></div>
     `;
   }
@@ -246,7 +246,7 @@ function quizScreen(){
   }).join('');
 
   return `
-    <div class="brand"><span class="mascot">🐰</span><h1 style="font-size:20px;">Kebun Angka</h1><div class="stars">⭐ ${totalStars}</div></div>
+    <div class="brand"><span class="mascot">🐰</span><h1 style="font-size:20px;">Matematika Dasar</h1><div class="stars">⭐ ${totalStars}</div></div>
     <div class="trail">${trail}</div>
     <div class="card">
       <div class="quiz-top">
@@ -271,13 +271,13 @@ function quizScreen(){
 function resultScreen(){
   const score = state.correctCount;
   let emoji='🌟', title='Kerja bagus!';
-  if(score === 10){ emoji='🏆'; title='Sempurna banget!'; }
-  else if(score >= 7){ emoji='🌟'; title='Hebat sekali!'; }
-  else if(score >= 4){ emoji='🌼'; title='Terus berlatih ya!'; }
-  else { emoji='🌱'; title='Yuk coba lagi, pasti bisa!'; }
+  if(score === 10){ emoji='🏆'; title='Sempurna banget kaya sayanggg!'; }
+  else if(score >= 7){ emoji='🌟'; title='Nice sekali sayanggg!'; }
+  else if(score >= 4){ emoji='🌼'; title='Semangat latihannya yaa sayangg!!'; }
+  else { emoji='🌱'; title='Dari awal yuk kita ulang lagi!!'; }
 
   return `
-    <div class="brand"><span class="mascot">🐰</span><h1 style="font-size:20px;">Kebun Angka</h1><div class="stars">⭐ ${totalStars}</div></div>
+    <div class="brand"><span class="mascot">🐰</span><h1 style="font-size:20px;">Matematika Dasar</h1><div class="stars">⭐ ${totalStars}</div></div>
     <div class="card">
       <div class="result-emoji">${emoji}</div>
       <div class="result-title">${title}</div>
