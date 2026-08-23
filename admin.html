@@ -186,7 +186,10 @@
   </div>
 
   <div class="panel">
-    <h2>📋 Daftar soal</h2>
+    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
+      <h2 style="margin-bottom:0;">📋 Daftar soal</h2>
+      <button id="resetAllBtn" style="border:none; border-radius:12px; padding:8px 14px; background:#FFEDEB; color:var(--coral-dark); font-weight:800; font-size:13px;">🗑️ Kosongkan Semua Soal</button>
+    </div>
     <div class="filter-row" id="filterRow">
       <button class="active" data-filter="semua">Semua</button>
       <button data-filter="tambah">Tambah</button>
@@ -313,6 +316,34 @@ async function deleteQuestion(id){
   renderStats();
   renderTable();
 }
+
+document.getElementById('resetAllBtn').addEventListener('click', async () => {
+  if(allQuestions.length === 0){
+    alert('Belum ada soal buat dihapus.');
+    return;
+  }
+  const step1 = confirm(`Yakin mau hapus SEMUA ${allQuestions.length} soal custom? Soal otomatis (generate) gak kepengaruh, cuma soal yang lo tambahin manual yang bakal hilang.`);
+  if(!step1) return;
+  const typed = prompt('Buat konfirmasi, ketik HAPUS (huruf besar semua):');
+  if(typed !== 'HAPUS'){
+    alert('Dibatalkan, gak jadi dihapus.');
+    return;
+  }
+  const btn = document.getElementById('resetAllBtn');
+  btn.disabled = true;
+  btn.textContent = 'Menghapus...';
+  const { error } = await sb.from('custom_questions').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+  btn.disabled = false;
+  btn.textContent = '🗑️ Kosongkan Semua Soal';
+  if(error){
+    alert('Gagal hapus semua: ' + error.message);
+    return;
+  }
+  allQuestions = [];
+  renderStats();
+  renderTable();
+  alert('Semua soal custom udah dikosongin.');
+});
 
 document.getElementById('filterRow').addEventListener('click', (e) => {
   const btn = e.target.closest('button[data-filter]');
