@@ -75,7 +75,7 @@ function generateQuestion(op){
   if(op === 'campur') op = pick(['tambah','kurang','kali','bagi']);
   let a,b,answer;
   if(op === 'tambah'){ a=rand(1,1000); b=rand(1,1000); answer=a+b; }
-  else if(op === 'kurang'){ a=rand(1,1000); b=rand(1000,a); answer=a-b; }
+  else if(op === 'kurang'){ a=rand(1,200); b=rand(199,1); answer=a-b; }
   else if(op === 'kali'){ a=rand(2,100); b=rand(2,100); answer=a*b; }
   else { b=rand(2,100); const q=rand(2,100); a=b*q; answer=q; }
   return { op, a, b, answer, isCustom:false };
