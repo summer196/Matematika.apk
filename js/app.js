@@ -219,8 +219,8 @@ function mainHtml(){
 /* ---------------- Home ---------------- */
 function homeScreen(){
   return `
-    <div class="brand"><span class="mascot">🐰</span><h1>Kebun Angka</h1><div class="stars">⭐ ${totalStars}</div></div>
-    <div class="subtitle">Ayo berhitung sambil main di kebun buah!</div>
+    <div class="brand"><span class="mascot">🐰</span><h1>Matematika</h1><div class="stars">⭐ ${totalStars}</div></div>
+    <div class="subtitle">Yuk belajar matematika bareng Chocolove kesayangan kamu!</div>
     <div class="card">
       <h2 style="font-size:18px;">Pilih materi</h2>
       <div class="op-grid">
@@ -230,7 +230,7 @@ function homeScreen(){
         <button class="op-card" data-op="bagi"><span class="sym">÷</span>Bagi</button>
         <button class="op-card campur" data-op="campur"><span class="sym">🌈</span>Campuran</button>
       </div>
-      <button class="start-btn" id="startBtn" disabled>Mulai Berpetualang</button>
+      <button class="start-btn" id="startBtn" disabled>Letsgoo Mulai</button>
       <div class="hint" id="homeHint">Pilih salah satu dulu ya, baru bisa mulai 🌻</div>
     </div>
   `;
