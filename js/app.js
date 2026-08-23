@@ -69,6 +69,13 @@ function escapeHtml(str){
   d.textContent = str;
   return d.innerHTML;
 }
+function genSessionId(){
+  if(window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random()*16|0, v = c==='x' ? r : (r&0x3|0x8);
+    return v.toString(16);
+  });
+}
 
 /* ---------------- Question generation (procedural) ---------------- */
 function generateQuestion(op){
@@ -395,6 +402,7 @@ function attachHandlers(){
       state.correctCount = 0;
       state.answered = false;
       state.slotResults = new Array(10).fill(null);
+      state.sessionId = genSessionId();
       render();
       state.questions = await generateRound(state.chosenOp);
       state.loading = false;
@@ -429,6 +437,16 @@ function attachHandlers(){
           state.feedbackMsg = `${pick(ENCOURAGE_WRONG)} Jawaban yang benar: ${q.answer}`;
           input.classList.add('wrong-shake');
         }
+        if(sb){
+          sb.from('submissions').insert([{
+            session_id: state.sessionId,
+            operation: state.chosenOp,
+            question_text: questionText(q),
+            student_answer: val,
+            correct_answer: String(q.answer),
+            auto_correct: correct
+          }]).then(()=>{}, (err) => console.warn('Gagal kirim jawaban ke admin:', err));
+        }
         render();
       } else {
         if(state.idx === 9){
@@ -451,6 +469,7 @@ function attachHandlers(){
       state.correctCount = 0;
       state.answered = false;
       state.slotResults = new Array(10).fill(null);
+      state.sessionId = genSessionId();
       render();
       state.questions = await generateRound(state.chosenOp);
       state.loading = false;

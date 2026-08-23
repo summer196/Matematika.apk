@@ -11,8 +11,10 @@ try{
 }catch(e){ console.warn(e); }
 
 let allQuestions = [];
+let allSubmissions = [];
 let currentFilter = 'semua';
 let currentEditId = null;
+let openSessions = {};
 
 const OP_LABEL = {tambah:'Tambah', kurang:'Kurang', kali:'Kali', bagi:'Bagi'};
 
@@ -32,6 +34,7 @@ function tryUnlock(){
     document.getElementById('pinGate').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
     loadQuestions();
+    loadSubmissions();
   } else {
     pinError.style.display = 'block';
     pinInput.value = '';
@@ -270,3 +273,126 @@ document.getElementById('editSaveBtn').addEventListener('click', async () => {
   renderTable();
   closeEditModal();
 });
+
+/* ---------------- Koreksi Jawaban (review submissions) ---------------- */
+const OP_LABEL_REVIEW = {tambah:'Tambah', kurang:'Kurang', kali:'Kali', bagi:'Bagi', campur:'Campuran'};
+
+function formatDateAdmin(iso){
+  const d = new Date(iso);
+  const days = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+  const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  const hh = String(d.getHours()).padStart(2,'0');
+  const mm = String(d.getMinutes()).padStart(2,'0');
+  return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()} · ${hh}:${mm}`;
+}
+
+async function loadSubmissions(){
+  const wrap = document.getElementById('reviewWrap');
+  if(!sb){
+    wrap.innerHTML = `<div class="empty-state">Supabase belum dikonfigurasi.</div>`;
+    return;
+  }
+  wrap.innerHTML = `<div class="loading-line">Memuat jawaban...</div>`;
+  const { data, error } = await sb.from('submissions').select('*').order('created_at', {ascending:false}).limit(500);
+  if(error){
+    wrap.innerHTML = `<div class="empty-state">Gagal memuat jawaban: ${escapeHtml(error.message)}</div>`;
+    return;
+  }
+  allSubmissions = data || [];
+  renderReview();
+}
+
+function groupBySession(subs){
+  const order = [];
+  const map = {};
+  subs.forEach(s => {
+    if(!map[s.session_id]){
+      map[s.session_id] = { session_id: s.session_id, operation: s.operation, date: s.created_at, items: [] };
+      order.push(s.session_id);
+    }
+    map[s.session_id].items.push(s);
+  });
+  return order.map(id => map[id]);
+}
+
+function effectiveStatus(item){
+  if(item.admin_status === 'benar') return 'benar';
+  if(item.admin_status === 'salah') return 'salah';
+  return item.auto_correct ? 'benar' : 'salah';
+}
+
+function renderReview(){
+  const wrap = document.getElementById('reviewWrap');
+  if(allSubmissions.length === 0){
+    wrap.innerHTML = `<div class="empty-state">Belum ada jawaban yang masuk. Nanti otomatis muncul di sini pas adek main 🌱</div>`;
+    return;
+  }
+  const sessions = groupBySession(allSubmissions);
+  wrap.innerHTML = sessions.map(sess => {
+    const benarCount = sess.items.filter(i => effectiveStatus(i) === 'benar').length;
+    const isOpen = !!openSessions[sess.session_id];
+    const itemsHtml = sess.items.map(item => {
+      const st = effectiveStatus(item);
+      return `
+        <div class="review-item" data-item-id="${item.id}">
+          <div class="ri-q">${escapeHtml(item.question_text)}</div>
+          <div class="ri-ans">Jawaban adek: <b>${escapeHtml(item.student_answer ?? '-')}</b> &nbsp;·&nbsp; Jawaban benar: <b>${escapeHtml(item.correct_answer ?? '-')}</b></div>
+          <div class="review-actions">
+            <button class="status-btn benar ${st==='benar'?'active':''}" data-action="mark" data-status="benar" data-id="${item.id}">✓ Benar</button>
+            <button class="status-btn salah ${st==='salah'?'active':''}" data-action="mark" data-status="salah" data-id="${item.id}">✗ Salah</button>
+          </div>
+          <div class="review-note-row">
+            <textarea placeholder="Catatan buat adek (opsional)" data-note-id="${item.id}">${escapeHtml(item.admin_note || '')}</textarea>
+            <button data-action="save-note" data-id="${item.id}">Simpan</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    return `
+      <div class="session-card ${isOpen?'open':''}" data-session="${sess.session_id}">
+        <div class="session-header" data-action="toggle-session" data-session="${sess.session_id}">
+          <span class="s-op">${OP_LABEL_REVIEW[sess.operation] || sess.operation || '-'}</span>
+          <span class="s-date">${formatDateAdmin(sess.date)}</span>
+          <span class="s-score">${benarCount}/${sess.items.length}</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="session-body">${itemsHtml}</div>
+      </div>
+    `;
+  }).join('');
+
+  wrap.querySelectorAll('[data-action="toggle-session"]').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = el.dataset.session;
+      openSessions[id] = !openSessions[id];
+      renderReview();
+    });
+  });
+  wrap.querySelectorAll('[data-action="mark"]').forEach(btn => {
+    btn.addEventListener('click', () => setAdminStatus(btn.dataset.id, btn.dataset.status));
+  });
+  wrap.querySelectorAll('[data-action="save-note"]').forEach(btn => {
+    btn.addEventListener('click', () => saveNote(btn.dataset.id));
+  });
+}
+
+async function setAdminStatus(id, status){
+  const { error } = await sb.from('submissions').update({ admin_status: status }).eq('id', id);
+  if(error){ alert('Gagal simpan koreksi: ' + error.message); return; }
+  const item = allSubmissions.find(x => x.id === id);
+  if(item) item.admin_status = status;
+  renderReview();
+}
+
+async function saveNote(id){
+  const textarea = document.querySelector(`textarea[data-note-id="${id}"]`);
+  const note = textarea ? textarea.value.trim() : '';
+  const { error } = await sb.from('submissions').update({ admin_note: note || null }).eq('id', id);
+  if(error){ alert('Gagal simpan catatan: ' + error.message); return; }
+  const item = allSubmissions.find(x => x.id === id);
+  if(item) item.admin_note = note;
+  alert('Catatan tersimpan.');
+}
+
+document.getElementById('refreshReviewBtn').addEventListener('click', loadSubmissions);
