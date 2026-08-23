@@ -58,8 +58,8 @@ const OP_LABELS = {
 };
 const ALL_OPS = ['tambah','kurang','kali','bagi','campur'];
 
-const ENCOURAGE_RIGHT = ['Wah pinter banget!', 'Betul sekali!', 'Keren, lanjut lagi!', 'Mantap!', 'Tepat sekali!'];
-const ENCOURAGE_WRONG = ['Yuk coba lagi ya!', 'Hampir benar, semangat!', 'Gak apa-apa, kita belajar lagi!', 'Ayo dihitung pelan-pelan!'];
+const ENCOURAGE_RIGHT = ['Pinterrnaa sayanggggkuuu', 'Betull sekalii sayangggg!', 'Nice sayanggggg!', 'Mantap banget bidadarikuuu', 'Luar biasa sayanggggku!'];
+const ENCOURAGE_WRONG = ['Coba lagi yuk sayangggg', 'Dikit lagi sayanggg, semangattt!!', 'Gapapa sayangggg, kita belajar lagi ya!', 'Pelan pelan ajaa sayangggg'];
 
 function rand(min, max){ return Math.floor(Math.random()*(max-min+1))+min; }
 function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
@@ -81,9 +81,9 @@ function genSessionId(){
 function generateQuestion(op){
   if(op === 'campur') op = pick(['tambah','kurang','kali','bagi']);
   let a,b,answer;
-  if(op === 'tambah'){ a=rand(1,10); b=rand(1,10); answer=a+b; }
+  if(op === 'tambah'){ a=rand(1,500); b=rand(1,500); answer=a+b; }
   else if(op === 'kurang'){ a=rand(5,20); b=rand(1,a); answer=a-b; }
-  else if(op === 'kali'){ a=rand(2,9); b=rand(2,9); answer=a*b; }
+  else if(op === 'kali'){ a=rand(2,5); b=rand(1,9); answer=a*b; }
   else { b=rand(2,9); const q=rand(2,9); a=b*q; answer=q; }
   return { op, a, b, answer, isCustom:false };
 }
