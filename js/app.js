@@ -190,10 +190,10 @@ function sidebarHtml(){
           <li>${navItem('topscore','🏆','Topscore')}</li>
           <li><a class="nav-item" href="admin.html"><span class="ic">🔐</span><span>Menu Admin</span></a></li>
         </ul>
-        <div class="sidebar-illustration">
-          <img src="assets/senyum-kenangan.jpg" alt="Ichan & Michell">
+        <div class="sidebar-footer">
+          <img class="sidebar-mini-avatar" src="assets/senyum-kenangan.jpg" alt="Ichan & Michell">
+          <span class="sidebar-tagline">Semangat belajarnya, sayangku 💕</span>
         </div>
-        <div class="sidebar-tagline">Semangat belajarnya, sayangku 💕</div>
       </div>
     </div>
   `;
