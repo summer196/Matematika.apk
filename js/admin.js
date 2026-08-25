@@ -331,7 +331,7 @@ function groupBySession(subs){
   const map = {};
   subs.forEach(s => {
     if(!map[s.session_id]){
-      map[s.session_id] = { session_id: s.session_id, operation: s.operation, date: s.created_at, items: [] };
+      map[s.session_id] = { session_id: s.session_id, operation: s.operation, date: s.created_at, username: s.username, items: [] };
       order.push(s.session_id);
     }
     map[s.session_id].items.push(s);
@@ -379,6 +379,7 @@ function renderReview(){
         <div class="session-header">
           <div data-action="toggle-session" data-session="${sess.session_id}" style="display:flex; align-items:center; gap:10px; flex:1; min-width:0; cursor:pointer; flex-wrap:wrap;">
             <span class="s-op">${OP_LABEL_REVIEW[sess.operation] || sess.operation || '-'}</span>
+            ${sess.username ? `<span class="user-badge">👤 ${escapeHtml(sess.username)}</span>` : ''}
             <span class="s-date">${formatDateAdmin(sess.date)} · ⏱ ${formatDurationAdmin(roundTotalMs)}</span>
             <span class="s-score">${benarCount}/${sess.items.length}</span>
             <span class="chevron">▼</span>
@@ -572,6 +573,7 @@ function renderStarLog(){
         <div class="sl-day">${escapeHtml(row.day_name || '-')}</div>
         <div class="sl-date">${formatSqlDate(row.log_date)}</div>
       </div>
+      ${row.username ? `<span class="user-badge">👤 ${escapeHtml(row.username)}</span>` : ''}
       <span class="star-log-badge ${row.reset_type}">${row.reset_type === 'manual' ? '✋ Manual' : '🌙 Otomatis'}</span>
       <div class="star-log-count">⭐ ${row.star_count}</div>
       <button class="status-btn" data-action="delete-star" data-id="${row.id}" style="background:#FFEDEB; color:var(--coral-dark);">🗑️</button>
@@ -620,6 +622,7 @@ function renderStarRecord(){
         <div class="sl-day">${escapeHtml(currentStarRecord.best_day_name || '-')}</div>
         <div class="sl-date">${currentStarRecord.best_date ? formatSqlDate(currentStarRecord.best_date) : '-'}</div>
       </div>
+      ${currentStarRecord.username ? `<span class="user-badge">👤 ${escapeHtml(currentStarRecord.username)}</span>` : ''}
       <div class="star-log-count">⭐ ${currentStarRecord.best_star_count}</div>
     </div>
   `;

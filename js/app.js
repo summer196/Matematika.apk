@@ -16,8 +16,10 @@ try{
 const STORAGE_KEY = 'kebunAngka_totalStars';
 const HISTORY_KEY = 'kebunAngka_history';
 const STAR_DATE_KEY = 'kebunAngka_starDate';
+const USERNAME_KEY = 'kebunAngka_username';
 
 let totalStars = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10);
+let username = localStorage.getItem(USERNAME_KEY) || '';
 
 function todayStr(){
   const d = new Date();
@@ -34,7 +36,8 @@ function logDailyStars(dateStr, count, type){
     log_date: dateStr,
     day_name: dayNameID(dateStr),
     star_count: count,
-    reset_type: type
+    reset_type: type,
+    username: username || null
   }]).then(()=>{}, (err) => console.warn('Gagal simpan log bintang harian:', err));
   updateStarRecordIfHigher(count, dateStr);
 }
@@ -49,6 +52,7 @@ async function updateStarRecordIfHigher(count, dateStr){
         best_star_count: count,
         best_date: dateStr,
         best_day_name: dayNameID(dateStr),
+        username: username || null,
         updated_at: new Date().toISOString()
       }).eq('id', 1);
     }
@@ -114,7 +118,7 @@ function formatDate(iso){
 
 /* ---------------- State ---------------- */
 let state = {
-  screen: 'home', // home | quiz | result | riwayat | topscore
+  screen: username ? 'home' : 'welcome', // welcome | home | quiz | result | riwayat | topscore
   chosenOp: null,
   questions: [],
   idx: 0,
@@ -339,7 +343,8 @@ function sidebarHtml(){
 
 function mainHtml(){
   let inner;
-  if(state.screen === 'home') inner = homeScreen();
+  if(state.screen === 'welcome') inner = welcomeScreen();
+  else if(state.screen === 'home') inner = homeScreen();
   else if(state.screen === 'quiz') inner = quizScreen();
   else if(state.screen === 'result') inner = resultScreen();
   else if(state.screen === 'riwayat') inner = riwayatScreen();
@@ -347,11 +352,25 @@ function mainHtml(){
   return `<div class="app"><div class="app-inner">${inner}</div></div>`;
 }
 
+/* ---------------- Welcome (isi nama pertama kali) ---------------- */
+function welcomeScreen(){
+  return `
+    <div class="card" style="text-align:center; margin-top:60px;">
+      <div style="font-size:44px; margin-bottom:10px;">🐰</div>
+      <h2 style="margin-bottom:6px;">Siapa namamu?</h2>
+      <div class="subtitle" style="margin-bottom:18px;">Biar keliatan bintang & jawabannya punya siapa ya</div>
+      <input type="text" id="usernameInput" placeholder="Nama kamu" maxlength="40"
+        style="width:100%; padding:14px; border-radius:16px; border:2px solid rgba(255,255,255,0.15); background:rgba(0,0,0,0.25); color:#fff; font-size:18px; text-align:center; margin-bottom:14px;">
+      <button class="start-btn" id="saveUsernameBtn">Mulai Main</button>
+    </div>
+  `;
+}
+
 /* ---------------- Home ---------------- */
 function homeScreen(){
   return `
     <div class="brand"><span class="mascot">🐰</span><h1>Matematika Dasar</h1><div class="stars">⭐ ${totalStars}</div></div>
-    <div class="subtitle">Ayo berhitung sambil main di kebun buah!</div>
+    <div class="subtitle">Halo ${escapeHtml(username || 'bidadari')}! Ayo berhitung sambil main di kebun buah! <button id="changeNameBtn" style="background:none; border:none; color:var(--gold); font-weight:800; font-size:12px; cursor:pointer; text-decoration:underline; padding:0;">Ganti nama</button></div>
     <div class="card">
       <h2 style="font-size:18px;">Pilih materi</h2>
       <div class="op-grid">
@@ -554,7 +573,28 @@ function attachHandlers(){
     });
   }
 
+  if(state.screen === 'welcome'){
+    const input = document.getElementById('usernameInput');
+    if(input) input.focus();
+    const btn = document.getElementById('saveUsernameBtn');
+    if(btn){
+      btn.addEventListener('click', () => {
+        const val = (input.value || '').trim();
+        if(!val){ input.classList.add('wrong-shake'); setTimeout(()=>input.classList.remove('wrong-shake'),350); return; }
+        username = val;
+        localStorage.setItem(USERNAME_KEY, username);
+        state.screen = 'home';
+        render();
+      });
+      input.addEventListener('keydown', (e) => { if(e.key === 'Enter') btn.click(); });
+    }
+  }
+
   if(state.screen === 'home'){
+    const changeNameBtn = document.getElementById('changeNameBtn');
+    if(changeNameBtn){
+      changeNameBtn.addEventListener('click', () => { state.screen = 'welcome'; render(); });
+    }
     document.querySelectorAll('.op-card').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.op-card').forEach(b => b.classList.remove('selected'));
@@ -618,7 +658,8 @@ function attachHandlers(){
             student_answer: val,
             correct_answer: String(q.answer),
             auto_correct: correct,
-            time_ms: questionTimeMs
+            time_ms: questionTimeMs,
+            username: username || null
           }]).then(()=>{}, (err) => console.warn('Gagal kirim jawaban ke admin:', err));
         }
         render();

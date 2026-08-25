@@ -153,6 +153,10 @@ tbody tr:last-child td{border-bottom:none;}
   display:flex; align-items:center; gap:10px; padding:12px 14px; cursor:pointer; background:#F8FAFD;
 }
 .session-header .s-op{font-weight:800; font-size:13px; color:var(--ink);}
+.user-badge{
+  font-size:11px; font-weight:800; color:var(--sun-dark); background:#FFF6E6;
+  border:1px solid #F0DDAE; padding:3px 9px; border-radius:999px;
+}
 .session-header .s-date{font-size:12px; color:var(--ink-soft); font-weight:600;}
 .session-header .s-score{margin-left:auto; font-family:'Baloo 2',sans-serif; font-size:15px; color:var(--berry-dark);}
 .session-header .chevron{font-size:11px; color:var(--ink-soft); transition:transform .2s ease;}
