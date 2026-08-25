@@ -178,18 +178,8 @@ function renderVisual(q){
     return `<div class="compact-visual"><span class="big">✨</span>Soal spesial dari kakak!</div>`;
   }
   const {op,a,b} = q;
-  if(op === 'tambah'){
-    return `<div class="icon-groups">
-      <div class="icon-grid">${iconRow(a)}</div>
-      <span class="op-symbol">+</span>
-      <div class="icon-grid">${iconRow(b)}</div>
-    </div>`;
-  }
-  if(op === 'kurang'){
-    let icons = '';
-    for(let i=0;i<a;i++) icons += `<span class="ic ${i >= a-b ? 'taken':''}">🍎</span>`;
-    return `<div><div class="icon-grid" style="max-width:260px;">${icons}</div>
-      <div class="compact-visual" style="margin-top:8px;">${b} buah diambil</div></div>`;
+  if(op === 'tambah' || op === 'kurang'){
+    return '';
   }
   if(op === 'kali'){
     const total = a*b;
@@ -311,6 +301,7 @@ function quizScreen(){
     `;
   }
   const q = state.questions[state.idx];
+  const visual = renderVisual(q);
   const trail = state.slotResults.map((r,i) => {
     if(i > state.idx) return '<span>🌱</span>';
     if(r === true) return '<span class="done">🌸</span>';
@@ -331,7 +322,7 @@ function quizScreen(){
         <span class="timer-chip">⏳ Total: <b id="roundTimer">${formatDuration(Date.now() - (state.roundStartTime || Date.now()))}</b></span>
       </div>
       <div class="question-text">${questionText(q)}</div>
-      <div class="visual-box">${renderVisual(q)}</div>
+      ${visual ? `<div class="visual-box">${visual}</div>` : ''}
       <div class="answer-row">
         <input type="number" inputmode="numeric" id="answerInput" placeholder="Jawabanmu" autocomplete="off" ${state.answered?'disabled':''}>
       </div>
