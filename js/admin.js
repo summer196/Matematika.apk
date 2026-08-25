@@ -12,6 +12,7 @@ try{
 
 let allQuestions = [];
 let allSubmissions = [];
+let starLog = [];
 let currentFilter = 'semua';
 let currentEditId = null;
 let openSessions = {};
@@ -36,6 +37,7 @@ function tryUnlock(){
     loadQuestions();
     loadSubmissions();
     loadSettings();
+    loadStarLog();
   } else {
     pinError.style.display = 'block';
     pinInput.value = '';
@@ -536,3 +538,56 @@ function formatDurationAdmin(ms){
   const s = totalSec % 60;
   return m > 0 ? `${m}:${String(s).padStart(2,'0')}` : `${s}d`;
 }
+
+/* ---------------- Riwayat Bintang Harian ---------------- */
+function formatSqlDate(dateStr){
+  const [y,m,d] = dateStr.split('-');
+  const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  return `${parseInt(d,10)} ${months[parseInt(m,10)-1]} ${y}`;
+}
+
+async function loadStarLog(){
+  const wrap = document.getElementById('starsWrap');
+  if(!sb){ wrap.innerHTML = `<div class="empty-state">Supabase belum dikonfigurasi.</div>`; return; }
+  wrap.innerHTML = `<div class="loading-line">Memuat riwayat bintang...</div>`;
+  const { data, error } = await sb.from('daily_star_log').select('*').order('log_date', {ascending:false}).order('created_at', {ascending:false});
+  if(error){
+    wrap.innerHTML = `<div class="empty-state">Gagal memuat riwayat bintang: ${escapeHtml(error.message)}</div>`;
+    return;
+  }
+  starLog = data || [];
+  renderStarLog();
+}
+
+function renderStarLog(){
+  const wrap = document.getElementById('starsWrap');
+  if(starLog.length === 0){
+    wrap.innerHTML = `<div class="empty-state">Belum ada riwayat bintang harian. Nanti otomatis kecatat tiap ganti hari atau pas dihapus manual 🌱</div>`;
+    return;
+  }
+  wrap.innerHTML = starLog.map(row => `
+    <div class="star-log-row" data-star-id="${row.id}">
+      <div class="star-log-date">
+        <div class="sl-day">${escapeHtml(row.day_name || '-')}</div>
+        <div class="sl-date">${formatSqlDate(row.log_date)}</div>
+      </div>
+      <span class="star-log-badge ${row.reset_type}">${row.reset_type === 'manual' ? '✋ Manual' : '🌙 Otomatis'}</span>
+      <div class="star-log-count">⭐ ${row.star_count}</div>
+      <button class="status-btn" data-action="delete-star" data-id="${row.id}" style="background:#FFEDEB; color:var(--coral-dark);">🗑️</button>
+    </div>
+  `).join('');
+
+  wrap.querySelectorAll('[data-action="delete-star"]').forEach(btn => {
+    btn.addEventListener('click', () => deleteStarLog(btn.dataset.id));
+  });
+}
+
+async function deleteStarLog(id){
+  if(!confirm('Hapus entri riwayat bintang ini?')) return;
+  const { error } = await sb.from('daily_star_log').delete().eq('id', id);
+  if(error){ alert('Gagal hapus: ' + error.message); return; }
+  starLog = starLog.filter(r => r.id !== id);
+  renderStarLog();
+}
+
+document.getElementById('refreshStarsBtn').addEventListener('click', loadStarLog);

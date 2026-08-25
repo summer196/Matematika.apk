@@ -35,6 +35,7 @@
     <button class="admin-tab active" data-tab="ringkasan">📊 Dashboard</button>
     <button class="admin-tab" data-tab="soal">📝 Kelola Soal</button>
     <button class="admin-tab" data-tab="koreksi">✅ Koreksi Jawaban</button>
+    <button class="admin-tab" data-tab="bintang">⭐ Riwayat Bintang</button>
     <button class="admin-tab" data-tab="pengaturan">⚙️ Pengaturan</button>
   </div>
 
@@ -114,6 +115,18 @@
         </div>
       </div>
       <div id="reviewWrap"><div class="loading-line">Memuat jawaban...</div></div>
+    </div>
+  </div>
+
+  <!-- ================= TAB: Riwayat Bintang ================= -->
+  <div class="tab-panel" data-tab-panel="bintang">
+    <div class="panel">
+      <div class="panel-header-row">
+        <h2>⭐ Riwayat Bintang Harian</h2>
+        <button id="refreshStarsBtn" class="reset-btn" style="background:#EAF0FF; color:var(--berry-dark);">🔄 Refresh</button>
+      </div>
+      <div class="sub-note">Bintang bidadari reset otomatis tiap jam 12 malam. Total bintang hari itu kesimpen di sini sebelum reset — begitu juga kalau lo hapus manual dari app.</div>
+      <div id="starsWrap"><div class="loading-line">Memuat riwayat bintang...</div></div>
     </div>
   </div>
 

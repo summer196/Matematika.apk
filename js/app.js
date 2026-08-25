@@ -15,8 +15,50 @@ try{
 /* ---------------- Storage keys ---------------- */
 const STORAGE_KEY = 'kebunAngka_totalStars';
 const HISTORY_KEY = 'kebunAngka_history';
+const STAR_DATE_KEY = 'kebunAngka_starDate';
 
 let totalStars = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10);
+
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function dayNameID(dateStr){
+  const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  const d = new Date(dateStr + 'T00:00:00');
+  return days[d.getDay()];
+}
+function logDailyStars(dateStr, count, type){
+  if(!sb || count <= 0) return;
+  sb.from('daily_star_log').insert([{
+    log_date: dateStr,
+    day_name: dayNameID(dateStr),
+    star_count: count,
+    reset_type: type
+  }]).then(()=>{}, (err) => console.warn('Gagal simpan log bintang harian:', err));
+}
+
+/* Cek apakah udah ganti hari sejak terakhir buka app — kalau iya, catat total
+   bintang hari sebelumnya (reset otomatis) terus reset ke 0 buat hari baru. */
+function performDailyResetCheck(){
+  const storedDate = localStorage.getItem(STAR_DATE_KEY);
+  const today = todayStr();
+  if(storedDate && storedDate !== today){
+    logDailyStars(storedDate, totalStars, 'otomatis');
+    totalStars = 0;
+    localStorage.setItem(STORAGE_KEY, '0');
+  }
+  localStorage.setItem(STAR_DATE_KEY, today);
+}
+performDailyResetCheck();
+// Jaga-jaga kalau app dibiarin kebuka lewat tengah malam tanpa di-refresh
+setInterval(() => {
+  const storedDate = localStorage.getItem(STAR_DATE_KEY);
+  if(storedDate && storedDate !== todayStr()){
+    performDailyResetCheck();
+    if(state.screen !== 'quiz') render();
+  }
+}, 60000);
 
 function loadHistory(){
   try{ return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); }
@@ -451,8 +493,10 @@ function attachHandlers(){
   if(clearHistoryBtn){
     clearHistoryBtn.addEventListener('click', () => {
       if(!confirm('Hapus semua riwayat soal DAN bintangnya juga di HP ini? Ini cuma ngehapus data di app, gak kepengaruh ke data di dashboard admin.')) return;
+      logDailyStars(todayStr(), totalStars, 'manual');
       localStorage.removeItem(HISTORY_KEY);
       localStorage.removeItem(STORAGE_KEY);
+      localStorage.setItem(STAR_DATE_KEY, todayStr());
       totalStars = 0;
       render();
     });
