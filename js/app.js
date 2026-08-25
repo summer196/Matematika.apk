@@ -47,7 +47,8 @@ let state = {
   answered: false,
   slotResults: [],
   loading: false,
-  sidebarOpen: false
+  sidebarOpen: false,
+  timerInterval: null
 };
 
 const OP_LABELS = {
@@ -219,9 +220,27 @@ function questionText(q){
 
 /* ---------------- Render root ---------------- */
 function render(){
+  stopLiveTimer();
   const root = document.getElementById('root');
   root.innerHTML = sidebarHtml() + mainHtml();
   attachHandlers();
+}
+
+function startLiveTimer(){
+  stopLiveTimer();
+  state.timerInterval = setInterval(() => {
+    const qEl = document.getElementById('qTimer');
+    const rEl = document.getElementById('roundTimer');
+    if(qEl && !state.answered){
+      qEl.textContent = formatDuration(Date.now() - (state.questionStartTime || Date.now()));
+    }
+    if(rEl){
+      rEl.textContent = formatDuration(Date.now() - (state.roundStartTime || Date.now()));
+    }
+  }, 1000);
+}
+function stopLiveTimer(){
+  if(state.timerInterval){ clearInterval(state.timerInterval); state.timerInterval = null; }
 }
 
 /* ---------------- Sidebar ---------------- */
@@ -306,6 +325,10 @@ function quizScreen(){
       <div class="quiz-top">
         <button class="back" id="backBtn">← Kembali</button>
         <span class="qnum">Soal ${state.idx+1} / 10</span>
+      </div>
+      <div class="timer-row">
+        <span class="timer-chip">⏱ Soal ini: <b id="qTimer">${formatDuration(Date.now() - (state.questionStartTime || Date.now()))}</b></span>
+        <span class="timer-chip">⏳ Total: <b id="roundTimer">${formatDuration(Date.now() - (state.roundStartTime || Date.now()))}</b></span>
       </div>
       <div class="question-text">${questionText(q)}</div>
       <div class="visual-box">${renderVisual(q)}</div>
@@ -462,6 +485,7 @@ function attachHandlers(){
   if(state.screen === 'quiz' && !state.loading){
     const input = document.getElementById('answerInput');
     input.focus();
+    startLiveTimer();
     const actionBtn = document.getElementById('actionBtn');
     document.getElementById('backBtn').addEventListener('click', () => { state.screen='home'; render(); });
 

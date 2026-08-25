@@ -152,6 +152,14 @@ body{
 .quiz-top .back{background:none; border:none; color:rgba(244,237,233,0.6); font-weight:800; font-size:14px; padding:6px;}
 .quiz-top .qnum{font-weight:800; color:rgba(244,237,233,0.6); font-size:14px;}
 
+.timer-row{display:flex; gap:8px; margin:10px 0 4px; flex-wrap:wrap;}
+.timer-chip{
+  font-size:12.5px; font-weight:700; color:rgba(244,237,233,0.65);
+  background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);
+  border-radius:999px; padding:5px 12px;
+}
+.timer-chip b{color:var(--gold); font-weight:800;}
+
 .question-text{font-family:'Baloo 2',sans-serif; font-size:32px; text-align:center; color:#fff; margin:6px 0 18px;}
 
 .visual-box{
