@@ -59,8 +59,8 @@ const OP_LABELS = {
 };
 const ALL_OPS = ['tambah','kurang','kali','bagi','campur'];
 
-const ENCOURAGE_RIGHT = ['Wah pinter banget!', 'Betul sekali!', 'Keren, lanjut lagi!', 'Mantap!', 'Tepat sekali!'];
-const ENCOURAGE_WRONG = ['Yuk coba lagi ya!', 'Hampir benar, semangat!', 'Gak apa-apa, kita belajar lagi!', 'Ayo dihitung pelan-pelan!'];
+const ENCOURAGE_RIGHT = ['Pinterrnyaa sayangggku', 'Betull banget sayangggg', 'Nice sayanggggg!!', 'Manteppp sayanggggg', 'Tepat sekalii sayanggggg!!'];
+const ENCOURAGE_WRONG = ['Coba lagi yuk sayanggg', 'Dikit lagi bener sayanggg', 'Gapapa sayanggggg kita belajar lagi yaa', 'Pelan pelan aja sayanggggg'];
 
 function rand(min, max){
   if(min > max){ const t=min; min=max; max=t; }
@@ -285,7 +285,7 @@ function mainHtml(){
 /* ---------------- Home ---------------- */
 function homeScreen(){
   return `
-    <div class="brand"><span class="mascot">🐰</span><h1>Kebun Angka</h1><div class="stars">⭐ ${totalStars}</div></div>
+    <div class="brand"><span class="mascot">🐰</span><h1>Matematika Dasar</h1><div class="stars">⭐ ${totalStars}</div></div>
     <div class="subtitle">Ayo berhitung sambil main di kebun buah!</div>
     <div class="card">
       <h2 style="font-size:18px;">Pilih materi</h2>
@@ -306,7 +306,7 @@ function homeScreen(){
 function quizScreen(){
   if(state.loading){
     return `
-      <div class="brand"><span class="mascot">🐰</span><h1 style="font-size:20px;">Kebun Angka</h1><div class="stars">⭐ ${totalStars}</div></div>
+      <div class="brand"><span class="mascot">🐰</span><h1 style="font-size:20px;">Matematika Dasar</h1><div class="stars">⭐ ${totalStars}</div></div>
       <div class="card"><div class="loading-line">Menyiapkan soal... 🌱</div></div>
     `;
   }
@@ -319,7 +319,7 @@ function quizScreen(){
   }).join('');
 
   return `
-    <div class="brand"><span class="mascot">🐰</span><h1 style="font-size:20px;">Kebun Angka</h1><div class="stars">⭐ ${totalStars}</div></div>
+    <div class="brand"><span class="mascot">🐰</span><h1 style="font-size:20px;">Matematika Dasar</h1><div class="stars">⭐ ${totalStars}</div></div>
     <div class="trail">${trail}</div>
     <div class="card">
       <div class="quiz-top">
@@ -354,7 +354,7 @@ function resultScreen(){
   else { emoji='🌱'; title='Yuk coba lagi, pasti bisa!'; }
 
   return `
-    <div class="brand"><span class="mascot">🐰</span><h1 style="font-size:20px;">Kebun Angka</h1><div class="stars">⭐ ${totalStars}</div></div>
+    <div class="brand"><span class="mascot">🐰</span><h1 style="font-size:20px;">Matematika Dasar</h1><div class="stars">⭐ ${totalStars}</div></div>
     <div class="card">
       <div class="result-emoji">${emoji}</div>
       <div class="result-title">${title}</div>
