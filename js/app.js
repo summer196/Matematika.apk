@@ -36,6 +36,39 @@ function logDailyStars(dateStr, count, type){
     star_count: count,
     reset_type: type
   }]).then(()=>{}, (err) => console.warn('Gagal simpan log bintang harian:', err));
+  updateStarRecordIfHigher(count, dateStr);
+}
+
+async function updateStarRecordIfHigher(count, dateStr){
+  if(!sb || count <= 0) return;
+  try{
+    const { data, error } = await sb.from('star_record').select('*').eq('id', 1).single();
+    if(error) return;
+    if(!data || count > data.best_star_count){
+      await sb.from('star_record').update({
+        best_star_count: count,
+        best_date: dateStr,
+        best_day_name: dayNameID(dateStr),
+        updated_at: new Date().toISOString()
+      }).eq('id', 1);
+    }
+  }catch(e){ console.warn('Gagal update rekor bintang:', e); }
+}
+
+async function fetchStarRecord(){
+  if(!sb) return null;
+  try{
+    const { data, error } = await sb.from('star_record').select('*').eq('id', 1).single();
+    if(error) return null;
+    return data;
+  }catch(e){ return null; }
+}
+let cachedStarRecord = null;
+function formatSqlDateClient(dateStr){
+  if(!dateStr) return '';
+  const [y,m,d] = dateStr.split('-');
+  const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  return `${parseInt(d,10)} ${months[parseInt(m,10)-1]} ${y}`;
 }
 
 /* Cek apakah udah ganti hari sejak terakhir buka app — kalau iya, catat total
@@ -458,9 +491,22 @@ function topscoreScreen(){
       </div>
     `).join('');
 
+  const starRecordHtml = `
+    <div class="topscore-section">
+      <h3 style="margin-bottom:10px;">⭐ Rekor Bintang Tertinggi</h3>
+      <div class="card" style="text-align:center; padding:22px;">
+        ${cachedStarRecord && cachedStarRecord.best_star_count > 0 ? `
+          <div class="result-score" style="margin-bottom:4px;">⭐ ${cachedStarRecord.best_star_count}</div>
+          <div class="result-sub" style="margin-bottom:0;">${cachedStarRecord.best_day_name || ''}${cachedStarRecord.best_day_name ? ' · ' : ''}${formatSqlDateClient(cachedStarRecord.best_date)}</div>
+        ` : `<div class="empty-state">Belum ada rekor. Kumpulin bintang buat pecahin rekor pertamamu!</div>`}
+      </div>
+    </div>
+  `;
+
   return `
     <div class="brand"><span class="mascot">🏆</span><h1 style="font-size:20px;">Topscore</h1><div class="stars">⭐ ${totalStars}</div></div>
     <div class="subtitle">Skor terbaik kamu di tiap materi</div>
+    ${starRecordHtml}
     <div class="topscore-section">
       <div class="topscore-grid">${cards}</div>
     </div>
@@ -486,6 +532,12 @@ function attachHandlers(){
       state.screen = btn.dataset.nav;
       state.sidebarOpen = false;
       render();
+      if(state.screen === 'topscore' && sb){
+        fetchStarRecord().then(rec => {
+          cachedStarRecord = rec;
+          if(state.screen === 'topscore') render();
+        });
+      }
     });
   });
 

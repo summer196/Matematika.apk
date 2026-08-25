@@ -38,6 +38,7 @@ function tryUnlock(){
     loadSubmissions();
     loadSettings();
     loadStarLog();
+    loadStarRecord();
   } else {
     pinError.style.display = 'block';
     pinInput.value = '';
@@ -591,3 +592,45 @@ async function deleteStarLog(id){
 }
 
 document.getElementById('refreshStarsBtn').addEventListener('click', loadStarLog);
+
+/* ---------------- Rekor Bintang Tertinggi ---------------- */
+let currentStarRecord = null;
+
+async function loadStarRecord(){
+  const wrap = document.getElementById('starRecordWrap');
+  if(!sb){ wrap.innerHTML = `<div class="empty-state">Supabase belum dikonfigurasi.</div>`; return; }
+  const { data, error } = await sb.from('star_record').select('*').eq('id', 1).single();
+  if(error){
+    wrap.innerHTML = `<div class="empty-state">Gagal memuat rekor: ${escapeHtml(error.message)}</div>`;
+    return;
+  }
+  currentStarRecord = data;
+  renderStarRecord();
+}
+
+function renderStarRecord(){
+  const wrap = document.getElementById('starRecordWrap');
+  if(!currentStarRecord || currentStarRecord.best_star_count <= 0){
+    wrap.innerHTML = `<div class="empty-state">Belum ada rekor tercatat.</div>`;
+    return;
+  }
+  wrap.innerHTML = `
+    <div class="star-log-row">
+      <div class="star-log-date">
+        <div class="sl-day">${escapeHtml(currentStarRecord.best_day_name || '-')}</div>
+        <div class="sl-date">${currentStarRecord.best_date ? formatSqlDate(currentStarRecord.best_date) : '-'}</div>
+      </div>
+      <div class="star-log-count">⭐ ${currentStarRecord.best_star_count}</div>
+    </div>
+  `;
+}
+
+document.getElementById('resetRecordBtn').addEventListener('click', async () => {
+  if(!confirm('Reset rekor bintang tertinggi ke 0? Riwayat bintang harian di bawah TIDAK ikut terhapus, cuma rekornya doang.')) return;
+  const { error } = await sb.from('star_record').update({
+    best_star_count: 0, best_date: null, best_day_name: null
+  }).eq('id', 1);
+  if(error){ alert('Gagal reset rekor: ' + error.message); return; }
+  currentStarRecord = { best_star_count: 0, best_date: null, best_day_name: null };
+  renderStarRecord();
+});
