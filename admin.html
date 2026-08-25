@@ -31,71 +31,101 @@
     <div class="sub">Soal yang lo tambahin di sini otomatis muncul di HP bidadari lo, gak perlu apa-apa lagi.</div>
   </div>
 
-  <div class="stats-row">
-    <div class="stat-box"><div class="num" id="statTotal">–</div><div class="lbl">Total soal</div></div>
-    <div class="stat-box"><div class="num" id="statActive">–</div><div class="lbl">Soal aktif</div></div>
-    <div class="stat-box"><div class="num" id="statInactive">–</div><div class="lbl">Nonaktif</div></div>
+  <div class="admin-tabs" id="adminTabs">
+    <button class="admin-tab active" data-tab="ringkasan">📊 Dashboard</button>
+    <button class="admin-tab" data-tab="soal">📝 Kelola Soal</button>
+    <button class="admin-tab" data-tab="koreksi">✅ Koreksi Jawaban</button>
+    <button class="admin-tab" data-tab="pengaturan">⚙️ Pengaturan</button>
   </div>
 
-  <div class="panel">
-    <h2>⚙️ Rentang Angka Soal Otomatis</h2>
-    <div class="sub-note">Atur rentang angka buat soal yang di-generate otomatis (bukan soal custom lo). Gak perlu ngoprek kode lagi.</div>
-    <div id="settingsWrap"><div class="loading-line">Memuat pengaturan...</div></div>
-    <button class="submit-btn" id="saveSettingsBtn" style="margin-top:14px;">Simpan Pengaturan</button>
-    <div class="form-msg" id="settingsMsg"></div>
+  <!-- ================= TAB: Dashboard / Ringkasan ================= -->
+  <div class="tab-panel active" data-tab-panel="ringkasan">
+    <div class="stats-row">
+      <div class="stat-box"><div class="num" id="statTotal">–</div><div class="lbl">Total soal</div></div>
+      <div class="stat-box"><div class="num" id="statActive">–</div><div class="lbl">Soal aktif</div></div>
+      <div class="stat-box"><div class="num" id="statInactive">–</div><div class="lbl">Nonaktif</div></div>
+      <div class="stat-box"><div class="num" id="statSubmissions">–</div><div class="lbl">Jawaban masuk</div></div>
+      <div class="stat-box"><div class="num" id="statSessions">–</div><div class="lbl">Sesi main</div></div>
+    </div>
+    <div class="panel">
+      <h2>👋 Selamat datang</h2>
+      <div class="sub-note" style="margin-bottom:0;">
+        Pake tab di atas buat pindah-pindah: <b>Kelola Soal</b> buat nambah/edit soal custom,
+        <b>Koreksi Jawaban</b> buat liat & nilai jawaban bidadari, dan <b>Pengaturan</b> buat atur rentang angka soal otomatis.
+      </div>
+    </div>
   </div>
 
-  <div class="panel">
-    <h2>➕ Tambah soal baru</h2>
-    <div class="form-grid">
-      <div class="field">
-        <label>Kategori</label>
-        <select id="fOperation">
-          <option value="tambah">Tambah</option>
-          <option value="kurang">Kurang</option>
-          <option value="kali">Kali</option>
-          <option value="bagi">Bagi</option>
-        </select>
+  <!-- ================= TAB: Kelola Soal ================= -->
+  <div class="tab-panel" data-tab-panel="soal">
+    <div class="panel">
+      <h2>➕ Tambah soal baru</h2>
+      <div class="form-grid">
+        <div class="field">
+          <label>Kategori</label>
+          <select id="fOperation">
+            <option value="tambah">Tambah</option>
+            <option value="kurang">Kurang</option>
+            <option value="kali">Kali</option>
+            <option value="bagi">Bagi</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Jawaban (angka)</label>
+          <input type="number" id="fAnswer" placeholder="contoh: 12">
+        </div>
+        <div class="field full">
+          <label>Teks soal</label>
+          <input type="text" id="fQuestion" placeholder="contoh: Ada 5 mangga, ditambah 7 mangga. Semuanya ada berapa?">
+        </div>
+        <div class="field full">
+          <label>Catatan visual (opsional — muncul di kotak gambar soal)</label>
+          <textarea id="fNote" placeholder="contoh: 🥭🥭🥭🥭🥭 + 🥭🥭🥭🥭🥭🥭🥭"></textarea>
+        </div>
       </div>
-      <div class="field">
-        <label>Jawaban (angka)</label>
-        <input type="number" id="fAnswer" placeholder="contoh: 12">
-      </div>
-      <div class="field full">
-        <label>Teks soal</label>
-        <input type="text" id="fQuestion" placeholder="contoh: Ada 5 mangga, ditambah 7 mangga. Semuanya ada berapa?">
-      </div>
-      <div class="field full">
-        <label>Catatan visual (opsional — muncul di kotak gambar soal)</label>
-        <textarea id="fNote" placeholder="contoh: 🥭🥭🥭🥭🥭 + 🥭🥭🥭🥭🥭🥭🥭"></textarea>
-      </div>
+      <button class="submit-btn" id="submitBtn">Simpan Soal</button>
+      <div class="form-msg" id="formMsg"></div>
     </div>
-    <button class="submit-btn" id="submitBtn">Simpan Soal</button>
-    <div class="form-msg" id="formMsg"></div>
+
+    <div class="panel">
+      <div class="panel-header-row">
+        <h2>📋 Daftar soal</h2>
+        <button id="resetAllBtn" class="reset-btn">🗑️ Kosongkan Semua Soal</button>
+      </div>
+      <div class="filter-row" id="filterRow">
+        <button class="active" data-filter="semua">Semua</button>
+        <button data-filter="tambah">Tambah</button>
+        <button data-filter="kurang">Kurang</button>
+        <button data-filter="kali">Kali</button>
+        <button data-filter="bagi">Bagi</button>
+      </div>
+      <div id="tableWrap"><div class="loading-line">Memuat soal...</div></div>
+    </div>
   </div>
 
-  <div class="panel">
-    <div class="panel-header-row">
-      <h2>📋 Daftar soal</h2>
-      <button id="resetAllBtn" class="reset-btn">🗑️ Kosongkan Semua Soal</button>
-    </div>
-    <div class="filter-row" id="filterRow">
-      <button class="active" data-filter="semua">Semua</button>
-      <button data-filter="tambah">Tambah</button>
-      <button data-filter="kurang">Kurang</button>
-      <button data-filter="kali">Kali</button>
-      <button data-filter="bagi">Bagi</button>
-    </div>
-    <div id="tableWrap"><div class="loading-line">Memuat soal...</div></div>
-  <div class="panel">
-    <div class="panel-header-row">
-      <h2>📝 Koreksi Jawaban Bidadari</h2>
-      <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        <button id="refreshReviewBtn" class="reset-btn" style="background:#EAF0FF; color:var(--berry-dark);">🔄 Refresh</button>
-        <button id="clearAllReviewBtn" class="reset-btn">🗑️ Hapus Semua Riwayat</button>
+  <!-- ================= TAB: Koreksi Jawaban ================= -->
+  <div class="tab-panel" data-tab-panel="koreksi">
+    <div class="panel">
+      <div class="panel-header-row">
+        <h2>📝 Koreksi Jawaban Bidadari</h2>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button id="refreshReviewBtn" class="reset-btn" style="background:#EAF0FF; color:var(--berry-dark);">🔄 Refresh</button>
+          <button id="clearAllReviewBtn" class="reset-btn">🗑️ Hapus Semua Riwayat</button>
+        </div>
       </div>
+      <div id="reviewWrap"><div class="loading-line">Memuat jawaban...</div></div>
     </div>
-    <div id="reviewWrap"><div class="loading-line">Memuat jawaban...</div></div>
+  </div>
+
+  <!-- ================= TAB: Pengaturan ================= -->
+  <div class="tab-panel" data-tab-panel="pengaturan">
+    <div class="panel">
+      <h2>⚙️ Rentang Angka Soal Otomatis</h2>
+      <div class="sub-note">Atur rentang angka buat soal yang di-generate otomatis (bukan soal custom lo). Gak perlu ngoprek kode lagi.</div>
+      <div id="settingsWrap"><div class="loading-line">Memuat pengaturan...</div></div>
+      <button class="submit-btn" id="saveSettingsBtn" style="margin-top:14px;">Simpan Pengaturan</button>
+      <div class="form-msg" id="settingsMsg"></div>
+    </div>
   </div>
 </div>
 

@@ -46,6 +46,15 @@ document.getElementById('pinSubmit').addEventListener('click', tryUnlock);
 pinInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') tryUnlock(); });
 pinInput.focus();
 
+/* ---------------- Tab navigation ---------------- */
+document.getElementById('adminTabs').addEventListener('click', (e) => {
+  const btn = e.target.closest('.admin-tab');
+  if(!btn) return;
+  const target = btn.dataset.tab;
+  document.querySelectorAll('.admin-tab').forEach(b => b.classList.toggle('active', b === btn));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.dataset.tabPanel === target));
+});
+
 /* ---------------- Data ---------------- */
 async function loadQuestions(){
   if(!sb){
@@ -301,6 +310,17 @@ async function loadSubmissions(){
   }
   allSubmissions = data || [];
   renderReview();
+  updateDashboardStats();
+}
+
+function updateDashboardStats(){
+  const statSub = document.getElementById('statSubmissions');
+  const statSess = document.getElementById('statSessions');
+  if(statSub) statSub.textContent = allSubmissions.length;
+  if(statSess){
+    const uniqueSessions = new Set(allSubmissions.map(s => s.session_id));
+    statSess.textContent = uniqueSessions.size;
+  }
 }
 
 function groupBySession(subs){

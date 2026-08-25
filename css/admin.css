@@ -31,7 +31,19 @@ body{ background:#F4F7FB; }
 .dash-header .sub{color:var(--ink-soft); font-weight:700; font-size:14px; width:100%;}
 .dash-header a.back-link{margin-left:auto; font-size:13px; font-weight:800; color:var(--berry-dark); text-decoration:none;}
 
-.stats-row{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:22px;}
+.admin-tabs{
+  display:flex; gap:8px; margin-bottom:22px; flex-wrap:wrap; overflow-x:auto;
+  padding-bottom:2px;
+}
+.admin-tab{
+  padding:10px 16px; border-radius:12px; border:2px solid var(--line); background:#fff;
+  font-weight:800; font-size:13.5px; color:var(--ink-soft); white-space:nowrap; flex-shrink:0;
+}
+.admin-tab.active{background:var(--berry); border-color:var(--berry); color:#fff;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+.stats-row{display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:22px;}
 .stat-box{background:var(--card); border-radius:16px; padding:16px; box-shadow:0 2px 0 var(--line);}
 .stat-box .num{font-family:'Baloo 2',sans-serif; font-size:26px; color:var(--berry-dark);}
 .stat-box .lbl{font-size:12.5px; color:var(--ink-soft); font-weight:700; margin-top:2px;}
