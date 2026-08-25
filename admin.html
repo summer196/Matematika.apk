@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Matematika Dasar</title>
+<title>Kebun Angka — Dashboard Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -26,15 +26,23 @@
 <div id="dashboard">
   <div class="dash-header">
     <span class="icon">🌻</span>
-    <h1>Kelola Soal — Matematika</h1>
+    <h1>Kelola Soal — Kebun Angka</h1>
     <a class="back-link" href="index.html">← Buka app bidadari</a>
-    <div class="sub">Soal yang di tambahin di sini otomatis muncul otomatis, gak perlu apa-apa lagi.</div>
+    <div class="sub">Soal yang lo tambahin di sini otomatis muncul di HP bidadari lo, gak perlu apa-apa lagi.</div>
   </div>
 
   <div class="stats-row">
     <div class="stat-box"><div class="num" id="statTotal">–</div><div class="lbl">Total soal</div></div>
     <div class="stat-box"><div class="num" id="statActive">–</div><div class="lbl">Soal aktif</div></div>
     <div class="stat-box"><div class="num" id="statInactive">–</div><div class="lbl">Nonaktif</div></div>
+  </div>
+
+  <div class="panel">
+    <h2>⚙️ Rentang Angka Soal Otomatis</h2>
+    <div class="sub-note">Atur rentang angka buat soal yang di-generate otomatis (bukan soal custom lo). Gak perlu ngoprek kode lagi.</div>
+    <div id="settingsWrap"><div class="loading-line">Memuat pengaturan...</div></div>
+    <button class="submit-btn" id="saveSettingsBtn" style="margin-top:14px;">Simpan Pengaturan</button>
+    <div class="form-msg" id="settingsMsg"></div>
   </div>
 
   <div class="panel">

@@ -22,9 +22,9 @@ function loadHistory(){
   try{ return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); }
   catch(e){ return []; }
 }
-function saveHistoryEntry(op, score){
+function saveHistoryEntry(op, score, timeMs){
   const history = loadHistory();
-  history.unshift({ date: new Date().toISOString(), op, score, total: 10 });
+  history.unshift({ date: new Date().toISOString(), op, score, total: 10, timeMs: timeMs || null });
   // Simpan maksimal 200 entri biar gak numpuk terus
   localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0,200)));
 }
@@ -61,7 +61,10 @@ const ALL_OPS = ['tambah','kurang','kali','bagi','campur'];
 const ENCOURAGE_RIGHT = ['Wah pinter banget!', 'Betul sekali!', 'Keren, lanjut lagi!', 'Mantap!', 'Tepat sekali!'];
 const ENCOURAGE_WRONG = ['Yuk coba lagi ya!', 'Hampir benar, semangat!', 'Gak apa-apa, kita belajar lagi!', 'Ayo dihitung pelan-pelan!'];
 
-function rand(min, max){ return Math.floor(Math.random()*(max-min+1))+min; }
+function rand(min, max){
+  if(min > max){ const t=min; min=max; max=t; }
+  return Math.floor(Math.random()*(max-min+1))+min;
+}
 function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 function escapeHtml(str){
@@ -76,15 +79,58 @@ function genSessionId(){
     return v.toString(16);
   });
 }
+function formatDuration(ms){
+  if(ms == null || isNaN(ms)) return '-';
+  const totalSec = Math.round(ms/1000);
+  const m = Math.floor(totalSec/60);
+  const s = totalSec % 60;
+  return m > 0 ? `${m}:${String(s).padStart(2,'0')}` : `${s}d`;
+}
+
+/* ---------------- Pengaturan rentang angka (dari dashboard admin) ---------------- */
+const DEFAULT_SETTINGS = {
+  tambah: {r1min:1,  r1max:10, r2min:1,  r2max:10},
+  kurang: {r1min:5,  r1max:20, r2min:1,  r2max:20},
+  kali:   {r1min:2,  r1max:9,  r2min:2,  r2max:9},
+  bagi:   {r1min:2,  r1max:9,  r2min:2,  r2max:9}
+};
+let questionSettings = null;
+
+async function loadQuestionSettings(){
+  if(questionSettings) return questionSettings;
+  if(!sb){ questionSettings = DEFAULT_SETTINGS; return questionSettings; }
+  try{
+    const { data, error } = await sb.from('question_settings').select('*');
+    if(error || !data || data.length === 0){ questionSettings = DEFAULT_SETTINGS; return questionSettings; }
+    const merged = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+    data.forEach(row => {
+      merged[row.operation] = { r1min:row.range1_min, r1max:row.range1_max, r2min:row.range2_min, r2max:row.range2_max };
+    });
+    questionSettings = merged;
+  }catch(e){
+    console.warn('Gagal ambil pengaturan rentang, pakai default.', e);
+    questionSettings = DEFAULT_SETTINGS;
+  }
+  return questionSettings;
+}
 
 /* ---------------- Question generation (procedural) ---------------- */
-function generateQuestion(op){
+function generateQuestion(op, settings){
   if(op === 'campur') op = pick(['tambah','kurang','kali','bagi']);
+  const s = settings[op];
   let a,b,answer;
-  if(op === 'tambah'){ a=rand(1,10); b=rand(1,10); answer=a+b; }
-  else if(op === 'kurang'){ a=rand(5,20); b=rand(1,a); answer=a-b; }
-  else if(op === 'kali'){ a=rand(2,9); b=rand(2,9); answer=a*b; }
-  else { b=rand(2,9); const q=rand(2,9); a=b*q; answer=q; }
+  if(op === 'tambah'){
+    a=rand(s.r1min,s.r1max); b=rand(s.r2min,s.r2max); answer=a+b;
+  } else if(op === 'kurang'){
+    a=rand(s.r1min,s.r1max);
+    const bMax = Math.min(s.r2max, a);
+    const bMin = Math.min(s.r2min, bMax);
+    b=rand(bMin,bMax); answer=a-b;
+  } else if(op === 'kali'){
+    a=rand(s.r1min,s.r1max); b=rand(s.r2min,s.r2max); answer=a*b;
+  } else {
+    const q=rand(s.r1min,s.r1max); b=rand(s.r2min,s.r2max); a=b*q; answer=q;
+  }
   return { op, a, b, answer, isCustom:false };
 }
 
@@ -110,10 +156,11 @@ async function fetchCustomQuestions(chosenOp){
 }
 
 async function generateRound(chosenOp){
+  const settings = await loadQuestionSettings();
   const custom = shuffle(await fetchCustomQuestions(chosenOp));
   if(custom.length >= 10) return custom.slice(0,10);
   let round = custom.slice();
-  while(round.length < 10) round.push(generateQuestion(chosenOp));
+  while(round.length < 10) round.push(generateQuestion(chosenOp, settings));
   return shuffle(round);
 }
 
@@ -309,7 +356,7 @@ function riwayatScreen(){
     body = `<div class="history-list">${history.slice(0,50).map(h => `
       <div class="history-item">
         <span class="h-op">${h.op === 'campur' ? 'Campuran' : (OP_LABELS[h.op] ? OP_LABELS[h.op].label : h.op)}</span>
-        <div class="h-info"><div class="h-date">${formatDate(h.date)}</div></div>
+        <div class="h-info"><div class="h-date">${formatDate(h.date)} · ⏱ ${formatDuration(h.timeMs)}</div></div>
         <div class="h-score">${h.score}/${h.total}</div>
       </div>
     `).join('')}</div>`;
@@ -348,7 +395,7 @@ function topscoreScreen(){
         <span class="rank">${i+1}</span>
         <div class="lb-info">
           <div class="lb-op">${h.op === 'campur' ? 'Campuran' : (OP_LABELS[h.op] ? OP_LABELS[h.op].label : h.op)}</div>
-          <div class="lb-date">${formatDate(h.date)}</div>
+          <div class="lb-date">${formatDate(h.date)} · ⏱ ${formatDuration(h.timeMs)}</div>
         </div>
         <div class="lb-score">${h.score}/10</div>
       </div>
@@ -406,6 +453,8 @@ function attachHandlers(){
       render();
       state.questions = await generateRound(state.chosenOp);
       state.loading = false;
+      state.roundStartTime = Date.now();
+      state.questionStartTime = Date.now();
       render();
     });
   }
@@ -424,6 +473,7 @@ function attachHandlers(){
         if(val === ''){ input.classList.add('wrong-shake'); setTimeout(()=>input.classList.remove('wrong-shake'),350); return; }
         const q = state.questions[state.idx];
         const correct = parseInt(val,10) === q.answer;
+        const questionTimeMs = Date.now() - (state.questionStartTime || Date.now());
         state.answered = true;
         state.lastCorrect = correct;
         state.slotResults[state.idx] = correct;
@@ -444,17 +494,24 @@ function attachHandlers(){
             question_text: questionText(q),
             student_answer: val,
             correct_answer: String(q.answer),
-            auto_correct: correct
+            auto_correct: correct,
+            time_ms: questionTimeMs
           }]).then(()=>{}, (err) => console.warn('Gagal kirim jawaban ke admin:', err));
         }
         render();
       } else {
         if(state.idx === 9){
-          saveHistoryEntry(state.chosenOp, state.correctCount);
+          const roundTimeMs = Date.now() - (state.roundStartTime || Date.now());
+          saveHistoryEntry(state.chosenOp, state.correctCount, roundTimeMs);
+          if(sb && state.sessionId){
+            sb.from('submissions').update({ round_total_ms: roundTimeMs }).eq('session_id', state.sessionId)
+              .then(()=>{}, (err) => console.warn('Gagal simpan total waktu:', err));
+          }
           state.screen = 'result';
         } else {
           state.idx++;
           state.answered = false;
+          state.questionStartTime = Date.now();
         }
         render();
       }
@@ -473,6 +530,8 @@ function attachHandlers(){
       render();
       state.questions = await generateRound(state.chosenOp);
       state.loading = false;
+      state.roundStartTime = Date.now();
+      state.questionStartTime = Date.now();
       render();
     });
     document.getElementById('homeBtn').addEventListener('click', () => { state.chosenOp=null; state.screen='home'; render(); });

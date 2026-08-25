@@ -35,6 +35,7 @@ function tryUnlock(){
     document.getElementById('dashboard').style.display = 'block';
     loadQuestions();
     loadSubmissions();
+    loadSettings();
   } else {
     pinError.style.display = 'block';
     pinInput.value = '';
@@ -331,12 +332,13 @@ function renderReview(){
   wrap.innerHTML = sessions.map(sess => {
     const benarCount = sess.items.filter(i => effectiveStatus(i) === 'benar').length;
     const isOpen = !!openSessions[sess.session_id];
+    const roundTotalMs = sess.items.find(i => i.round_total_ms != null)?.round_total_ms;
     const itemsHtml = sess.items.map(item => {
       const st = effectiveStatus(item);
       return `
         <div class="review-item" data-item-id="${item.id}">
           <div class="ri-q">${escapeHtml(item.question_text)}</div>
-          <div class="ri-ans">Jawaban bidadari: <b>${escapeHtml(item.student_answer ?? '-')}</b> &nbsp;·&nbsp; Jawaban benar: <b>${escapeHtml(item.correct_answer ?? '-')}</b></div>
+          <div class="ri-ans">Jawaban bidadari: <b>${escapeHtml(item.student_answer ?? '-')}</b> &nbsp;·&nbsp; Jawaban benar: <b>${escapeHtml(item.correct_answer ?? '-')}</b> &nbsp;·&nbsp; ⏱ <b>${formatDurationAdmin(item.time_ms)}</b></div>
           <div class="review-actions">
             <button class="status-btn benar ${st==='benar'?'active':''}" data-action="mark" data-status="benar" data-id="${item.id}">✓ Benar</button>
             <button class="status-btn salah ${st==='salah'?'active':''}" data-action="mark" data-status="salah" data-id="${item.id}">✗ Salah</button>
@@ -352,9 +354,9 @@ function renderReview(){
     return `
       <div class="session-card ${isOpen?'open':''}" data-session="${sess.session_id}">
         <div class="session-header">
-          <div data-action="toggle-session" data-session="${sess.session_id}" style="display:flex; align-items:center; gap:10px; flex:1; min-width:0; cursor:pointer;">
+          <div data-action="toggle-session" data-session="${sess.session_id}" style="display:flex; align-items:center; gap:10px; flex:1; min-width:0; cursor:pointer; flex-wrap:wrap;">
             <span class="s-op">${OP_LABEL_REVIEW[sess.operation] || sess.operation || '-'}</span>
-            <span class="s-date">${formatDateAdmin(sess.date)}</span>
+            <span class="s-date">${formatDateAdmin(sess.date)} · ⏱ ${formatDurationAdmin(roundTotalMs)}</span>
             <span class="s-score">${benarCount}/${sess.items.length}</span>
             <span class="chevron">▼</span>
           </div>
@@ -430,3 +432,87 @@ async function saveNote(id){
 }
 
 document.getElementById('refreshReviewBtn').addEventListener('click', loadSubmissions);
+
+/* ---------------- Pengaturan rentang angka soal otomatis ---------------- */
+const SETTINGS_LABELS = {
+  tambah: {r1:'Angka pertama', r2:'Angka kedua'},
+  kurang: {r1:'Angka awal (yang dikurangi)', r2:'Angka pengurang (maks.)'},
+  kali:   {r1:'Faktor pertama', r2:'Faktor kedua'},
+  bagi:   {r1:'Hasil bagi (jawaban)', r2:'Pembagi'}
+};
+const SETTINGS_DEFAULT_ROW = {range1_min:1, range1_max:10, range2_min:1, range2_max:10};
+
+async function loadSettings(){
+  const wrap = document.getElementById('settingsWrap');
+  if(!sb){ wrap.innerHTML = `<div class="empty-state">Supabase belum dikonfigurasi.</div>`; return; }
+  const { data, error } = await sb.from('question_settings').select('*');
+  if(error){ wrap.innerHTML = `<div class="empty-state">Gagal memuat pengaturan: ${escapeHtml(error.message)}</div>`; return; }
+  const map = {};
+  (data || []).forEach(r => map[r.operation] = r);
+  const ops = ['tambah','kurang','kali','bagi'];
+  wrap.innerHTML = ops.map(op => {
+    const row = map[op] || SETTINGS_DEFAULT_ROW;
+    const lbl = SETTINGS_LABELS[op];
+    return `
+      <div class="settings-op-row">
+        <div class="settings-op-title">${OP_LABEL[op]}</div>
+        <div class="settings-range-grid">
+          <div><label>${lbl.r1} — min</label><input type="number" id="s_${op}_r1min" value="${row.range1_min}"></div>
+          <div><label>${lbl.r1} — max</label><input type="number" id="s_${op}_r1max" value="${row.range1_max}"></div>
+          <div><label>${lbl.r2} — min</label><input type="number" id="s_${op}_r2min" value="${row.range2_min}"></div>
+          <div><label>${lbl.r2} — max</label><input type="number" id="s_${op}_r2max" value="${row.range2_max}"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+document.getElementById('saveSettingsBtn').addEventListener('click', async () => {
+  const ops = ['tambah','kurang','kali','bagi'];
+  const msg = document.getElementById('settingsMsg');
+  const rows = ops.map(op => ({
+    operation: op,
+    range1_min: Number(document.getElementById(`s_${op}_r1min`).value),
+    range1_max: Number(document.getElementById(`s_${op}_r1max`).value),
+    range2_min: Number(document.getElementById(`s_${op}_r2min`).value),
+    range2_max: Number(document.getElementById(`s_${op}_r2max`).value)
+  }));
+
+  for(const r of rows){
+    const vals = [r.range1_min, r.range1_max, r.range2_min, r.range2_max];
+    if(vals.some(v => isNaN(v))){
+      msg.textContent = 'Semua kolom angka harus keisi.';
+      msg.className = 'form-msg err';
+      return;
+    }
+    if(r.range1_min > r.range1_max || r.range2_min > r.range2_max){
+      msg.textContent = `Nilai min gak boleh lebih besar dari max (cek bagian ${OP_LABEL[r.operation]}).`;
+      msg.className = 'form-msg err';
+      return;
+    }
+  }
+
+  const btn = document.getElementById('saveSettingsBtn');
+  btn.disabled = true;
+  btn.textContent = 'Menyimpan...';
+  const { error } = await sb.from('question_settings').upsert(rows, { onConflict: 'operation' });
+  btn.disabled = false;
+  btn.textContent = 'Simpan Pengaturan';
+
+  if(error){
+    msg.textContent = 'Gagal simpan: ' + error.message;
+    msg.className = 'form-msg err';
+    return;
+  }
+  msg.textContent = 'Tersimpan! Soal otomatis langsung pakai rentang baru ini mulai sekarang.';
+  msg.className = 'form-msg ok';
+});
+
+/* ---------------- Timer helper buat panel Koreksi Jawaban ---------------- */
+function formatDurationAdmin(ms){
+  if(ms == null || isNaN(ms)) return '-';
+  const totalSec = Math.round(ms/1000);
+  const m = Math.floor(totalSec/60);
+  const s = totalSec % 60;
+  return m > 0 ? `${m}:${String(s).padStart(2,'0')}` : `${s}d`;
+}
