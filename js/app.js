@@ -378,6 +378,7 @@ function riwayatScreen(){
   return `
     <div class="brand"><span class="mascot">📜</span><h1 style="font-size:20px;">Riwayat Soal</h1><div class="stars">⭐ ${totalStars}</div></div>
     <div class="subtitle">Semua percobaan yang udah kamu kerjain</div>
+    ${history.length > 0 ? `<button class="check-btn" id="clearHistoryBtn" style="background:rgba(255,107,91,0.18); box-shadow:0 5px 0 rgba(255,107,91,0.3); color:#FF9585; margin-bottom:16px;">🗑️ Hapus Riwayat</button>` : ''}
     <div class="card">${body}</div>
   `;
 }
@@ -445,6 +446,15 @@ function attachHandlers(){
       render();
     });
   });
+
+  const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+  if(clearHistoryBtn){
+    clearHistoryBtn.addEventListener('click', () => {
+      if(!confirm('Hapus semua riwayat soal di HP ini? Ini cuma ngehapus riwayat di app, gak kepengaruh ke data di dashboard admin.')) return;
+      localStorage.removeItem(HISTORY_KEY);
+      render();
+    });
+  }
 
   if(state.screen === 'home'){
     document.querySelectorAll('.op-card').forEach(btn => {

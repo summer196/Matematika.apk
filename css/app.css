@@ -47,9 +47,9 @@ body::before{
 .hamburger-btn{
   width:40px; height:40px; border:none; background:rgba(255,255,255,0.08); border-radius:10px;
   color:#fff; font-size:20px; display:flex; align-items:center; justify-content:center;
-  margin:0 0 18px 12px; flex-shrink:0;
+  margin:0 0 18px 0; flex-shrink:0;
 }
-.sidebar.open .hamburger-btn{ margin-left:16px; }
+.sidebar.open .hamburger-btn{ margin-left:16px; align-self:flex-start; }
 
 .sidebar-content{
   display:none; flex-direction:column; flex:1; padding:0 18px 18px; overflow-y:auto;
