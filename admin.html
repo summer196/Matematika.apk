@@ -36,6 +36,7 @@
     <button class="admin-tab" data-tab="soal">📝 Kelola Soal</button>
     <button class="admin-tab" data-tab="koreksi">✅ Koreksi Jawaban</button>
     <button class="admin-tab" data-tab="bintang">⭐ Riwayat Bintang</button>
+    <button class="admin-tab" data-tab="pengguna">👤 Data Pengguna</button>
     <button class="admin-tab" data-tab="pengaturan">⚙️ Pengaturan</button>
   </div>
 
@@ -122,10 +123,10 @@
   <div class="tab-panel" data-tab-panel="bintang">
     <div class="panel">
       <div class="panel-header-row">
-        <h2>🏆 Rekor Bintang Tertinggi</h2>
-        <button id="resetRecordBtn" class="reset-btn">🗑️ Reset Rekor</button>
+        <h2>🏆 Rekor Bintang Tertinggi (per orang)</h2>
+        <button id="resetAllRecordsBtn" class="reset-btn">🗑️ Reset Semua Rekor</button>
       </div>
-      <div class="sub-note">Rekor ini cuma bisa naik — kesimpen otomatis tiap kali bintang harian di-reset (otomatis maupun manual) kalau ngalahin rekor lama. Cuma bisa direset dari sini.</div>
+      <div class="sub-note">Tiap orang punya rekornya masing-masing, gak nyampur. Rekor cuma bisa naik — kesimpen otomatis tiap kali bintang harian di-reset (otomatis maupun manual) kalau ngalahin rekor lama orang itu sendiri.</div>
       <div id="starRecordWrap"><div class="loading-line">Memuat rekor...</div></div>
     </div>
 
@@ -134,8 +135,20 @@
         <h2>⭐ Riwayat Bintang Harian</h2>
         <button id="refreshStarsBtn" class="reset-btn" style="background:#EAF0FF; color:var(--berry-dark);">🔄 Refresh</button>
       </div>
-      <div class="sub-note">Bintang bidadari reset otomatis tiap jam 12 malam. Total bintang hari itu kesimpen di sini sebelum reset — begitu juga kalau lo hapus manual dari app.</div>
+      <div class="sub-note">Bintang bidadari reset otomatis tiap jam 12 malam. Total bintang hari itu kesimpen di sini sebelum reset — begitu juga kalau dihapus manual dari app.</div>
       <div id="starsWrap"><div class="loading-line">Memuat riwayat bintang...</div></div>
+    </div>
+  </div>
+
+  <!-- ================= TAB: Data Pengguna ================= -->
+  <div class="tab-panel" data-tab-panel="pengguna">
+    <div class="panel">
+      <div class="panel-header-row">
+        <h2>👤 Data Pengguna</h2>
+        <button id="refreshUsersBtn" class="reset-btn" style="background:#EAF0FF; color:var(--berry-dark);">🔄 Refresh</button>
+      </div>
+      <div class="sub-note">Progress tiap orang kesimpen di server berdasarkan nama yang mereka isi pas pertama buka app — jadi walau HP-nya di-reset atau cache dihapus, tinggal login pake nama yang sama buat balikin datanya.</div>
+      <div id="usersWrap"><div class="loading-line">Memuat data pengguna...</div></div>
     </div>
   </div>
 

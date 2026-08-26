@@ -39,6 +39,7 @@ function tryUnlock(){
     loadSettings();
     loadStarLog();
     loadStarRecord();
+    loadUserProgress();
   } else {
     pinError.style.display = 'block';
     pinInput.value = '';
@@ -595,45 +596,86 @@ async function deleteStarLog(id){
 
 document.getElementById('refreshStarsBtn').addEventListener('click', loadStarLog);
 
-/* ---------------- Rekor Bintang Tertinggi ---------------- */
-let currentStarRecord = null;
+/* ---------------- Rekor Bintang Tertinggi (per username) ---------------- */
+let allStarRecords = [];
 
 async function loadStarRecord(){
   const wrap = document.getElementById('starRecordWrap');
   if(!sb){ wrap.innerHTML = `<div class="empty-state">Supabase belum dikonfigurasi.</div>`; return; }
-  const { data, error } = await sb.from('star_record').select('*').eq('id', 1).single();
+  const { data, error } = await sb.from('star_record').select('*').order('best_star_count', {ascending:false});
   if(error){
     wrap.innerHTML = `<div class="empty-state">Gagal memuat rekor: ${escapeHtml(error.message)}</div>`;
     return;
   }
-  currentStarRecord = data;
+  allStarRecords = data || [];
   renderStarRecord();
 }
 
 function renderStarRecord(){
   const wrap = document.getElementById('starRecordWrap');
-  if(!currentStarRecord || currentStarRecord.best_star_count <= 0){
-    wrap.innerHTML = `<div class="empty-state">Belum ada rekor tercatat.</div>`;
+  if(allStarRecords.length === 0){
+    wrap.innerHTML = `<div class="empty-state">Belum ada rekor tercatat dari siapa pun.</div>`;
     return;
   }
-  wrap.innerHTML = `
-    <div class="star-log-row">
+  wrap.innerHTML = allStarRecords.map(rec => `
+    <div class="star-log-row" data-record-username="${escapeHtml(rec.username)}">
       <div class="star-log-date">
-        <div class="sl-day">${escapeHtml(currentStarRecord.best_day_name || '-')}</div>
-        <div class="sl-date">${currentStarRecord.best_date ? formatSqlDate(currentStarRecord.best_date) : '-'}</div>
+        <div class="sl-day">👤 ${escapeHtml(rec.username)}</div>
+        <div class="sl-date">${rec.best_day_name ? escapeHtml(rec.best_day_name) + ' · ' : ''}${rec.best_date ? formatSqlDate(rec.best_date) : '-'}</div>
       </div>
-      ${currentStarRecord.username ? `<span class="user-badge">👤 ${escapeHtml(currentStarRecord.username)}</span>` : ''}
-      <div class="star-log-count">⭐ ${currentStarRecord.best_star_count}</div>
+      <div class="star-log-count">⭐ ${rec.best_star_count}</div>
+      <button class="status-btn" data-action="delete-record" data-username="${escapeHtml(rec.username)}" style="background:#FFEDEB; color:var(--coral-dark);">🗑️</button>
     </div>
-  `;
+  `).join('');
+
+  wrap.querySelectorAll('[data-action="delete-record"]').forEach(btn => {
+    btn.addEventListener('click', () => resetOneRecord(btn.dataset.username));
+  });
 }
 
-document.getElementById('resetRecordBtn').addEventListener('click', async () => {
-  if(!confirm('Reset rekor bintang tertinggi ke 0? Riwayat bintang harian di bawah TIDAK ikut terhapus, cuma rekornya doang.')) return;
-  const { error } = await sb.from('star_record').update({
-    best_star_count: 0, best_date: null, best_day_name: null
-  }).eq('id', 1);
+async function resetOneRecord(uname){
+  if(!confirm(`Reset rekor bintang punya "${uname}" ke 0? Riwayat bintang harian TIDAK ikut terhapus.`)) return;
+  const { error } = await sb.from('star_record').delete().eq('username', uname);
   if(error){ alert('Gagal reset rekor: ' + error.message); return; }
-  currentStarRecord = { best_star_count: 0, best_date: null, best_day_name: null };
+  allStarRecords = allStarRecords.filter(r => r.username !== uname);
+  renderStarRecord();
+}
+
+document.getElementById('resetAllRecordsBtn').addEventListener('click', async () => {
+  if(allStarRecords.length === 0){ alert('Belum ada rekor buat direset.'); return; }
+  const step1 = confirm(`Reset SEMUA rekor bintang (${allStarRecords.length} orang) ke 0? Riwayat bintang harian TIDAK ikut terhapus.`);
+  if(!step1) return;
+  const typed = prompt('Ketik HAPUS (huruf besar semua) buat konfirmasi:');
+  if(typed !== 'HAPUS'){ alert('Dibatalkan.'); return; }
+  const { error } = await sb.from('star_record').delete().neq('username', '__never_matches__');
+  if(error){ alert('Gagal reset semua rekor: ' + error.message); return; }
+  allStarRecords = [];
   renderStarRecord();
 });
+
+/* ---------------- Data Pengguna (progress per username, buat recovery) ---------------- */
+async function loadUserProgress(){
+  const wrap = document.getElementById('usersWrap');
+  if(!sb){ wrap.innerHTML = `<div class="empty-state">Supabase belum dikonfigurasi.</div>`; return; }
+  const { data, error } = await sb.from('user_progress').select('*').order('updated_at', {ascending:false});
+  if(error){
+    wrap.innerHTML = `<div class="empty-state">Gagal memuat data pengguna: ${escapeHtml(error.message)}</div>`;
+    return;
+  }
+  const users = data || [];
+  if(users.length === 0){
+    wrap.innerHTML = `<div class="empty-state">Belum ada pengguna yang tercatat. Nanti otomatis muncul begitu ada yang isi nama di app.</div>`;
+    return;
+  }
+  wrap.innerHTML = users.map(u => `
+    <div class="star-log-row">
+      <div class="star-log-date">
+        <div class="sl-day">👤 ${escapeHtml(u.username)}</div>
+        <div class="sl-date">Update terakhir: ${new Date(u.updated_at).toLocaleString('id-ID', {dateStyle:'medium', timeStyle:'short'})}</div>
+      </div>
+      <div class="star-log-count">⭐ ${u.total_stars} <span style="font-size:11px; color:var(--ink-soft); font-weight:700;">hari ini</span></div>
+    </div>
+  `).join('');
+}
+
+document.getElementById('refreshUsersBtn').addEventListener('click', loadUserProgress);

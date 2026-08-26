@@ -43,26 +43,26 @@ function logDailyStars(dateStr, count, type){
 }
 
 async function updateStarRecordIfHigher(count, dateStr){
-  if(!sb || count <= 0) return;
+  if(!sb || count <= 0 || !username) return;
   try{
-    const { data, error } = await sb.from('star_record').select('*').eq('id', 1).single();
+    const { data, error } = await sb.from('star_record').select('*').eq('username', username).maybeSingle();
     if(error) return;
     if(!data || count > data.best_star_count){
-      await sb.from('star_record').update({
+      await sb.from('star_record').upsert([{
+        username,
         best_star_count: count,
         best_date: dateStr,
         best_day_name: dayNameID(dateStr),
-        username: username || null,
         updated_at: new Date().toISOString()
-      }).eq('id', 1);
+      }], { onConflict: 'username' });
     }
   }catch(e){ console.warn('Gagal update rekor bintang:', e); }
 }
 
 async function fetchStarRecord(){
-  if(!sb) return null;
+  if(!sb || !username) return null;
   try{
-    const { data, error } = await sb.from('star_record').select('*').eq('id', 1).single();
+    const { data, error } = await sb.from('star_record').select('*').eq('username', username).maybeSingle();
     if(error) return null;
     return data;
   }catch(e){ return null; }
@@ -73,6 +73,24 @@ function formatSqlDateClient(dateStr){
   const [y,m,d] = dateStr.split('-');
   const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
   return `${parseInt(d,10)} ${months[parseInt(m,10)-1]} ${y}`;
+}
+
+/* ---------------- Sync progress ke server (biar bisa direstore per username) ---------------- */
+async function syncProgressFromServer(){
+  if(!sb || !username) return;
+  try{
+    const { data, error } = await sb.from('user_progress').select('*').eq('username', username).maybeSingle();
+    if(error || !data) return;
+    totalStars = data.total_stars || 0;
+    localStorage.setItem(STORAGE_KEY, String(totalStars));
+    if(data.star_date) localStorage.setItem(STAR_DATE_KEY, data.star_date);
+  }catch(e){ console.warn('Gagal restore progress dari server:', e); }
+}
+function pushProgressToServer(){
+  if(!sb || !username) return;
+  sb.from('user_progress').upsert([{
+    username, total_stars: totalStars, star_date: todayStr(), updated_at: new Date().toISOString()
+  }], { onConflict: 'username' }).then(()=>{}, (err) => console.warn('Gagal simpan progress ke server:', err));
 }
 
 /* Cek apakah udah ganti hari sejak terakhir buka app — kalau iya, catat total
@@ -87,25 +105,44 @@ function performDailyResetCheck(){
   }
   localStorage.setItem(STAR_DATE_KEY, today);
 }
-performDailyResetCheck();
+
 // Jaga-jaga kalau app dibiarin kebuka lewat tengah malam tanpa di-refresh
 setInterval(() => {
   const storedDate = localStorage.getItem(STAR_DATE_KEY);
   if(storedDate && storedDate !== todayStr()){
     performDailyResetCheck();
+    pushProgressToServer();
     if(state.screen !== 'quiz') render();
   }
 }, 60000);
 
+let cachedServerHistory = null;
+async function fetchServerHistory(){
+  if(!sb || !username) return null;
+  try{
+    const { data, error } = await sb.from('round_history').select('*').eq('username', username).order('played_at', {ascending:false}).limit(200);
+    if(error) return null;
+    return data.map(r => ({ date: r.played_at, op: r.operation, score: r.score, total: r.total, timeMs: r.time_ms }));
+  }catch(e){ return null; }
+}
 function loadHistory(){
+  if(cachedServerHistory) return cachedServerHistory;
   try{ return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); }
   catch(e){ return []; }
 }
 function saveHistoryEntry(op, score, timeMs){
-  const history = loadHistory();
+  const raw = localStorage.getItem(HISTORY_KEY);
+  let history = [];
+  try{ history = JSON.parse(raw || '[]'); }catch(e){}
   history.unshift({ date: new Date().toISOString(), op, score, total: 10, timeMs: timeMs || null });
-  // Simpan maksimal 200 entri biar gak numpuk terus
+  // Simpan maksimal 200 entri biar gak numpuk terus (fallback offline doang)
   localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0,200)));
+  if(sb && username){
+    sb.from('round_history').insert([{
+      username, operation: op, score, total: 10, time_ms: timeMs || null
+    }]).then(()=>{}, (err) => console.warn('Gagal simpan riwayat ke server:', err));
+  }
+  cachedServerHistory = null; // biar layar Riwayat/Topscore fetch ulang data terbaru
 }
 function formatDate(iso){
   const d = new Date(iso);
@@ -551,6 +588,12 @@ function attachHandlers(){
       state.screen = btn.dataset.nav;
       state.sidebarOpen = false;
       render();
+      if((state.screen === 'topscore' || state.screen === 'riwayat') && sb && username){
+        fetchServerHistory().then(h => {
+          if(h) cachedServerHistory = h;
+          if(state.screen === 'topscore' || state.screen === 'riwayat') render();
+        });
+      }
       if(state.screen === 'topscore' && sb){
         fetchStarRecord().then(rec => {
           cachedStarRecord = rec;
@@ -563,12 +606,17 @@ function attachHandlers(){
   const clearHistoryBtn = document.getElementById('clearHistoryBtn');
   if(clearHistoryBtn){
     clearHistoryBtn.addEventListener('click', () => {
-      if(!confirm('Hapus semua riwayat soal DAN bintangnya juga di HP ini? Ini cuma ngehapus data di app, gak kepengaruh ke data di dashboard admin.')) return;
+      if(!confirm('Hapus semua riwayat soal DAN bintangnya juga? Ini beneran ngehapus data kamu (nama: ' + (username||'-') + ') dari server, gak cuma HP ini. Data jawaban di panel "Koreksi Jawaban" admin tetep aman, cuma riwayat skor & bintang yang kehapus.')) return;
       logDailyStars(todayStr(), totalStars, 'manual');
       localStorage.removeItem(HISTORY_KEY);
       localStorage.removeItem(STORAGE_KEY);
       localStorage.setItem(STAR_DATE_KEY, todayStr());
       totalStars = 0;
+      cachedServerHistory = null;
+      if(sb && username){
+        sb.from('round_history').delete().eq('username', username).then(()=>{}, (err) => console.warn('Gagal hapus riwayat server:', err));
+        pushProgressToServer();
+      }
       render();
     });
   }
@@ -578,11 +626,20 @@ function attachHandlers(){
     if(input) input.focus();
     const btn = document.getElementById('saveUsernameBtn');
     if(btn){
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', async () => {
         const val = (input.value || '').trim();
         if(!val){ input.classList.add('wrong-shake'); setTimeout(()=>input.classList.remove('wrong-shake'),350); return; }
         username = val;
         localStorage.setItem(USERNAME_KEY, username);
+        btn.disabled = true;
+        btn.textContent = 'Memuat data...';
+        if(sb){
+          await syncProgressFromServer();
+          performDailyResetCheck();
+          pushProgressToServer();
+        }
+        cachedServerHistory = null;
+        cachedStarRecord = null;
         state.screen = 'home';
         render();
       });
@@ -644,6 +701,7 @@ function attachHandlers(){
           state.correctCount++;
           totalStars++;
           localStorage.setItem(STORAGE_KEY, totalStars);
+          pushProgressToServer();
           state.feedbackMsg = pick(ENCOURAGE_RIGHT);
           input.classList.add('right-glow');
         } else {
@@ -702,4 +760,19 @@ function attachHandlers(){
   }
 }
 
-render();
+async function initApp(){
+  if(username && sb){
+    // Kalau localStorage kosong (cache/HP baru di-reset) tapi nama udah ada,
+    // coba restore progress dari server dulu sebelum nentuin reset harian.
+    const hadLocalDate = !!localStorage.getItem(STAR_DATE_KEY);
+    if(!hadLocalDate){
+      await syncProgressFromServer();
+    }
+    performDailyResetCheck();
+    pushProgressToServer();
+  } else if(username){
+    performDailyResetCheck();
+  }
+  render();
+}
+initApp();
