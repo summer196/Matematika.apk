@@ -6,7 +6,7 @@
 <title>Matematika Dasar — Dashboard Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/admin.css">
 </head>
@@ -14,30 +14,28 @@
 
 <div id="pinGate">
   <div class="pin-card">
-    <div class="icon">🔒</div>
     <h1>Dashboard Admin</h1>
-    <p>Masukin PIN buat kelola soal Matematika Dasar</p>
+    <p>Masukkan PIN untuk mengelola soal Matematika Dasar.</p>
     <input type="password" inputmode="numeric" id="pinInput" placeholder="••••" maxlength="8">
     <button id="pinSubmit">Masuk</button>
-    <div class="pin-error" id="pinError">PIN salah, coba lagi ya.</div>
+    <div class="pin-error" id="pinError">PIN salah, silakan coba lagi.</div>
   </div>
 </div>
 
 <div id="dashboard">
   <div class="dash-header">
-    <span class="icon">🌻</span>
     <h1>Kelola Soal — Matematika Dasar</h1>
-    <a class="back-link" href="index.html">← Buka app bidadari</a>
-    <div class="sub">Soal yang lo tambahin di sini otomatis muncul di HP bidadari lo, gak perlu apa-apa lagi.</div>
+    <a class="back-link" href="index.html">← Buka Aplikasi</a>
+    <div class="sub">Soal yang ditambahkan di sini akan otomatis muncul pada aplikasi, tanpa perlu langkah tambahan.</div>
   </div>
 
   <div class="admin-tabs" id="adminTabs">
-    <button class="admin-tab active" data-tab="ringkasan">📊 Dashboard</button>
-    <button class="admin-tab" data-tab="soal">📝 Kelola Soal</button>
-    <button class="admin-tab" data-tab="koreksi">✅ Koreksi Jawaban</button>
-    <button class="admin-tab" data-tab="bintang">⭐ Riwayat Bintang</button>
-    <button class="admin-tab" data-tab="pengguna">👤 Data Pengguna</button>
-    <button class="admin-tab" data-tab="pengaturan">⚙️ Pengaturan</button>
+    <button class="admin-tab active" data-tab="ringkasan">Dashboard</button>
+    <button class="admin-tab" data-tab="soal">Kelola Soal</button>
+    <button class="admin-tab" data-tab="koreksi">Koreksi Jawaban</button>
+    <button class="admin-tab" data-tab="bintang">Riwayat Bintang</button>
+    <button class="admin-tab" data-tab="pengguna">Data Pengguna</button>
+    <button class="admin-tab" data-tab="pengaturan">Pengaturan</button>
   </div>
 
   <!-- ================= TAB: Dashboard / Ringkasan ================= -->
@@ -50,10 +48,10 @@
       <div class="stat-box"><div class="num" id="statSessions">–</div><div class="lbl">Sesi main</div></div>
     </div>
     <div class="panel">
-      <h2>👋 Selamat datang</h2>
+      <h2>Selamat Datang</h2>
       <div class="sub-note" style="margin-bottom:0;">
-        Pake tab di atas buat pindah-pindah: <b>Kelola Soal</b> buat nambah/edit soal custom,
-        <b>Koreksi Jawaban</b> buat liat & nilai jawaban bidadari, dan <b>Pengaturan</b> buat atur rentang angka soal otomatis.
+        Gunakan tab di atas untuk berpindah menu: <b>Kelola Soal</b> untuk menambah dan mengedit soal khusus,
+        <b>Koreksi Jawaban</b> untuk melihat dan menilai jawaban bidadari, dan <b>Pengaturan</b> untuk mengatur rentang angka soal otomatis.
       </div>
     </div>
   </div>
@@ -61,7 +59,7 @@
   <!-- ================= TAB: Kelola Soal ================= -->
   <div class="tab-panel" data-tab-panel="soal">
     <div class="panel">
-      <h2>➕ Tambah soal baru</h2>
+      <h2>Tambah Soal Baru</h2>
       <div class="form-grid">
         <div class="field">
           <label>Kategori</label>
@@ -74,15 +72,15 @@
         </div>
         <div class="field">
           <label>Jawaban (angka)</label>
-          <input type="number" id="fAnswer" placeholder="contoh: 12">
+          <input type="number" id="fAnswer" placeholder="Contoh: 12">
         </div>
         <div class="field full">
           <label>Teks soal</label>
-          <input type="text" id="fQuestion" placeholder="contoh: Ada 5 mangga, ditambah 7 mangga. Semuanya ada berapa?">
+          <input type="text" id="fQuestion" placeholder="Contoh: Ada 5 mangga, ditambah 7 mangga. Berapa jumlahnya?">
         </div>
         <div class="field full">
-          <label>Catatan visual (opsional — muncul di kotak gambar soal)</label>
-          <textarea id="fNote" placeholder="contoh: 🥭🥭🥭🥭🥭 + 🥭🥭🥭🥭🥭🥭🥭"></textarea>
+          <label>Catatan visual (opsional, muncul di kotak gambar soal)</label>
+          <textarea id="fNote" placeholder="Contoh: 5 mangga ditambah 7 mangga"></textarea>
         </div>
       </div>
       <button class="submit-btn" id="submitBtn">Simpan Soal</button>
@@ -91,8 +89,8 @@
 
     <div class="panel">
       <div class="panel-header-row">
-        <h2>📋 Daftar soal</h2>
-        <button id="resetAllBtn" class="reset-btn">🗑️ Kosongkan Semua Soal</button>
+        <h2>Daftar Soal</h2>
+        <button id="resetAllBtn" class="reset-btn">Kosongkan Semua Soal</button>
       </div>
       <div class="filter-row" id="filterRow">
         <button class="active" data-filter="semua">Semua</button>
@@ -109,10 +107,10 @@
   <div class="tab-panel" data-tab-panel="koreksi">
     <div class="panel">
       <div class="panel-header-row">
-        <h2>📝 Koreksi Jawaban Bidadari</h2>
+        <h2>Koreksi Jawaban Bidadari</h2>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button id="refreshReviewBtn" class="reset-btn" style="background:#EAF0FF; color:var(--berry-dark);">🔄 Refresh</button>
-          <button id="clearAllReviewBtn" class="reset-btn">🗑️ Hapus Semua Riwayat</button>
+          <button id="refreshReviewBtn" class="reset-btn" style="background:#EAF0FF; color:var(--berry-dark);">Refresh</button>
+          <button id="clearAllReviewBtn" class="reset-btn">Hapus Semua Riwayat</button>
         </div>
       </div>
       <div id="reviewWrap"><div class="loading-line">Memuat jawaban...</div></div>
@@ -123,19 +121,19 @@
   <div class="tab-panel" data-tab-panel="bintang">
     <div class="panel">
       <div class="panel-header-row">
-        <h2>🏆 Rekor Bintang Tertinggi (per orang)</h2>
-        <button id="resetAllRecordsBtn" class="reset-btn">🗑️ Reset Semua Rekor</button>
+        <h2>Rekor Bintang Tertinggi (per Pengguna)</h2>
+        <button id="resetAllRecordsBtn" class="reset-btn">Reset Semua Rekor</button>
       </div>
-      <div class="sub-note">Tiap orang punya rekornya masing-masing, gak nyampur. Rekor cuma bisa naik — kesimpen otomatis tiap kali bintang harian di-reset (otomatis maupun manual) kalau ngalahin rekor lama orang itu sendiri.</div>
+      <div class="sub-note">Setiap pengguna memiliki rekornya masing-masing, tidak tercampur. Rekor hanya dapat bertambah, tersimpan otomatis setiap kali bintang harian direset (otomatis maupun manual) apabila melampaui rekor sebelumnya.</div>
       <div id="starRecordWrap"><div class="loading-line">Memuat rekor...</div></div>
     </div>
 
     <div class="panel">
       <div class="panel-header-row">
-        <h2>⭐ Riwayat Bintang Harian</h2>
-        <button id="refreshStarsBtn" class="reset-btn" style="background:#EAF0FF; color:var(--berry-dark);">🔄 Refresh</button>
+        <h2>Riwayat Bintang Harian</h2>
+        <button id="refreshStarsBtn" class="reset-btn" style="background:#EAF0FF; color:var(--berry-dark);">Refresh</button>
       </div>
-      <div class="sub-note">Bintang bidadari reset otomatis tiap jam 12 malam. Total bintang hari itu kesimpen di sini sebelum reset — begitu juga kalau dihapus manual dari app.</div>
+      <div class="sub-note">Bintang bidadari direset otomatis setiap pukul 00.00. Total bintang hari itu tersimpan di sini sebelum reset, begitu juga apabila dihapus secara manual dari aplikasi.</div>
       <div id="starsWrap"><div class="loading-line">Memuat riwayat bintang...</div></div>
     </div>
   </div>
@@ -144,10 +142,10 @@
   <div class="tab-panel" data-tab-panel="pengguna">
     <div class="panel">
       <div class="panel-header-row">
-        <h2>👤 Data Pengguna</h2>
-        <button id="refreshUsersBtn" class="reset-btn" style="background:#EAF0FF; color:var(--berry-dark);">🔄 Refresh</button>
+        <h2>Data Pengguna</h2>
+        <button id="refreshUsersBtn" class="reset-btn" style="background:#EAF0FF; color:var(--berry-dark);">Refresh</button>
       </div>
-      <div class="sub-note">Progress tiap orang kesimpen di server berdasarkan nama yang mereka isi pas pertama buka app — jadi walau HP-nya di-reset atau cache dihapus, tinggal login pake nama yang sama buat balikin datanya.</div>
+      <div class="sub-note">Progres setiap pengguna tersimpan di server berdasarkan nama yang diisi saat pertama kali membuka aplikasi. Apabila perangkat direset atau cache dihapus, cukup masuk kembali dengan nama yang sama untuk mengembalikan datanya.</div>
       <div id="usersWrap"><div class="loading-line">Memuat data pengguna...</div></div>
     </div>
   </div>
@@ -155,8 +153,8 @@
   <!-- ================= TAB: Pengaturan ================= -->
   <div class="tab-panel" data-tab-panel="pengaturan">
     <div class="panel">
-      <h2>⚙️ Rentang Angka Soal Otomatis</h2>
-      <div class="sub-note">Atur rentang angka buat soal yang di-generate otomatis (bukan soal custom lo). Gak perlu ngoprek kode lagi.</div>
+      <h2>Rentang Angka Soal Otomatis</h2>
+      <div class="sub-note">Atur rentang angka untuk soal yang dibuat otomatis (bukan soal khusus). Tidak perlu mengubah kode.</div>
       <div id="settingsWrap"><div class="loading-line">Memuat pengaturan...</div></div>
       <button class="submit-btn" id="saveSettingsBtn" style="margin-top:14px;">Simpan Pengaturan</button>
       <div class="form-msg" id="settingsMsg"></div>
@@ -167,7 +165,7 @@
 <!-- Modal Koreksi (edit soal) -->
 <div class="modal-overlay" id="editModal">
   <div class="modal-box">
-    <h2>✏️ Koreksi Soal</h2>
+    <h2>Koreksi Soal</h2>
     <div class="field">
       <label>Kategori</label>
       <select id="eOperation">

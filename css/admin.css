@@ -10,7 +10,6 @@ body{ background:#F4F7FB; }
   background:var(--card); border-radius:22px; padding:32px 26px; width:100%; max-width:340px;
   box-shadow:0 10px 30px rgba(43,58,85,0.12); text-align:center;
 }
-.pin-card .icon{font-size:40px; margin-bottom:10px;}
 .pin-card h1{font-size:22px; margin-bottom:6px;}
 .pin-card p{color:var(--ink-soft); font-size:14px; margin:0 0 18px; font-weight:600;}
 .pin-card input{
@@ -26,7 +25,6 @@ body{ background:#F4F7FB; }
 /* ---- Dashboard shell ---- */
 #dashboard{display:none; max-width:920px; margin:0 auto; padding:26px 18px 60px;}
 .dash-header{display:flex; align-items:center; gap:12px; margin-bottom:22px; flex-wrap:wrap;}
-.dash-header .icon{font-size:30px;}
 .dash-header h1{font-size:24px;}
 .dash-header .sub{color:var(--ink-soft); font-weight:700; font-size:14px; width:100%;}
 .dash-header a.back-link{margin-left:auto; font-size:13px; font-weight:800; color:var(--berry-dark); text-decoration:none;}
@@ -45,7 +43,7 @@ body{ background:#F4F7FB; }
 
 .stats-row{display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:22px;}
 .stat-box{background:var(--card); border-radius:16px; padding:16px; box-shadow:0 2px 0 var(--line);}
-.stat-box .num{font-family:'Baloo 2',sans-serif; font-size:26px; color:var(--berry-dark);}
+.stat-box .num{font-family:'Plus Jakarta Sans',sans-serif; font-size:26px; color:var(--berry-dark);}
 .stat-box .lbl{font-size:12.5px; color:var(--ink-soft); font-weight:700; margin-top:2px;}
 
 .panel{background:var(--card); border-radius:20px; padding:22px; box-shadow:0 2px 0 var(--line); margin-bottom:22px;}
@@ -131,7 +129,7 @@ tbody tr:last-child td{border-bottom:none;}
 .star-log-date{min-width:110px;}
 .sl-day{font-weight:800; font-size:13px; color:var(--ink);}
 .sl-date{font-size:11.5px; color:var(--ink-soft); font-weight:600;}
-.star-log-count{font-family:'Baloo 2',sans-serif; font-size:18px; color:var(--sun-dark); margin-left:auto;}
+.star-log-count{font-family:'Plus Jakarta Sans',sans-serif; font-size:18px; color:var(--sun-dark); margin-left:auto;}
 .star-log-badge{font-size:11px; font-weight:800; padding:4px 10px; border-radius:999px; flex-shrink:0;}
 .star-log-badge.manual{background:#FFEDEB; color:var(--coral-dark);}
 .star-log-badge.otomatis{background:#E7F7EE; color:var(--leaf-dark);}
@@ -158,7 +156,7 @@ tbody tr:last-child td{border-bottom:none;}
   border:1px solid #F0DDAE; padding:3px 9px; border-radius:999px;
 }
 .session-header .s-date{font-size:12px; color:var(--ink-soft); font-weight:600;}
-.session-header .s-score{margin-left:auto; font-family:'Baloo 2',sans-serif; font-size:15px; color:var(--berry-dark);}
+.session-header .s-score{margin-left:auto; font-family:'Plus Jakarta Sans',sans-serif; font-size:15px; color:var(--berry-dark);}
 .session-header .chevron{font-size:11px; color:var(--ink-soft); transition:transform .2s ease;}
 .session-card.open .chevron{transform:rotate(180deg);}
 .session-body{display:none; padding:6px 14px 14px; border-top:1px solid var(--line);}

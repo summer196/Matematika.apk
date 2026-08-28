@@ -85,7 +85,7 @@ function renderTable(){
   const wrap = document.getElementById('tableWrap');
   const filtered = currentFilter === 'semua' ? allQuestions : allQuestions.filter(q => q.operation === currentFilter);
   if(filtered.length === 0){
-    wrap.innerHTML = `<div class="empty-state">Belum ada soal di kategori ini. Tambahin dari form di atas ya 🌱</div>`;
+    wrap.innerHTML = `<div class="empty-state">Belum ada soal pada kategori ini. Tambahkan melalui formulir di atas.</div>`;
     return;
   }
   const rows = filtered.map(q => `
@@ -95,8 +95,8 @@ function renderTable(){
       <td data-label="Jawaban"><b>${escapeHtml(String(q.answer))}</b></td>
       <td data-label="Aksi">
         <div class="row-actions">
-          <button class="btn-edit" data-action="edit" data-id="${q.id}">✏️ Koreksi</button>
-          <button class="btn-toggle ${q.is_active ? 'is-active':''}" data-action="toggle" data-id="${q.id}">${q.is_active ? '✓ Aktif':'Nonaktif'}</button>
+          <button class="btn-edit" data-action="edit" data-id="${q.id}">Koreksi</button>
+          <button class="btn-toggle ${q.is_active ? 'is-active':''}" data-action="toggle" data-id="${q.id}">${q.is_active ? 'Aktif':'Nonaktif'}</button>
           <button class="btn-delete" data-action="delete" data-id="${q.id}">Hapus</button>
         </div>
       </td>
@@ -132,7 +132,7 @@ async function toggleActive(id){
 }
 
 async function deleteQuestion(id){
-  if(!confirm('Yakin mau hapus soal ini?')) return;
+  if(!confirm('Yakin ingin menghapus soal ini?')) return;
   const { error } = await sb.from('custom_questions').delete().eq('id', id);
   if(error){ alert('Gagal hapus: ' + error.message); return; }
   allQuestions = allQuestions.filter(x => x.id !== id);
@@ -152,14 +152,14 @@ document.getElementById('filterRow').addEventListener('click', (e) => {
 /* ---------------- Kosongkan semua soal ---------------- */
 document.getElementById('resetAllBtn').addEventListener('click', async () => {
   if(allQuestions.length === 0){
-    alert('Belum ada soal buat dihapus.');
+    alert('Belum ada soal untuk dihapus.');
     return;
   }
-  const step1 = confirm(`Yakin mau hapus SEMUA ${allQuestions.length} soal custom? Soal otomatis (generate) gak kepengaruh, cuma soal yang lo tambahin manual yang bakal hilang.`);
+  const step1 = confirm(`Yakin ingin menghapus SEMUA ${allQuestions.length} soal khusus? Soal otomatis tidak terpengaruh, hanya soal yang ditambahkan secara manual yang akan terhapus.`);
   if(!step1) return;
   const typed = prompt('Buat konfirmasi, ketik HAPUS (huruf besar semua):');
   if(typed !== 'HAPUS'){
-    alert('Dibatalkan, gak jadi dihapus.');
+    alert('Dibatalkan, soal tidak dihapus.');
     return;
   }
   const btn = document.getElementById('resetAllBtn');
@@ -167,7 +167,7 @@ document.getElementById('resetAllBtn').addEventListener('click', async () => {
   btn.textContent = 'Menghapus...';
   const { error } = await sb.from('custom_questions').delete().neq('id', '00000000-0000-0000-0000-000000000000');
   btn.disabled = false;
-  btn.textContent = '🗑️ Kosongkan Semua Soal';
+  btn.textContent = 'Kosongkan Semua Soal';
   if(error){
     alert('Gagal hapus semua: ' + error.message);
     return;
@@ -175,7 +175,7 @@ document.getElementById('resetAllBtn').addEventListener('click', async () => {
   allQuestions = [];
   renderStats();
   renderTable();
-  alert('Semua soal custom udah dikosongin.');
+  alert('Seluruh soal khusus telah dikosongkan.');
 });
 
 /* ---------------- Tambah soal baru ---------------- */
@@ -214,7 +214,7 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
     return;
   }
 
-  msg.textContent = 'Soal tersimpan! Langsung muncul di app bidadari lo 🎉';
+  msg.textContent = 'Soal tersimpan dan langsung muncul pada aplikasi bidadari.';
   msg.className = 'form-msg ok';
   document.getElementById('fQuestion').value = '';
   document.getElementById('fAnswer').value = '';
@@ -349,7 +349,7 @@ function effectiveStatus(item){
 function renderReview(){
   const wrap = document.getElementById('reviewWrap');
   if(allSubmissions.length === 0){
-    wrap.innerHTML = `<div class="empty-state">Belum ada jawaban yang masuk. Nanti otomatis muncul di sini pas bidadari main 🌱</div>`;
+    wrap.innerHTML = `<div class="empty-state">Belum ada jawaban yang masuk. Data akan otomatis muncul di sini setelah bidadari mulai berlatih.</div>`;
     return;
   }
   const sessions = groupBySession(allSubmissions);
@@ -364,8 +364,8 @@ function renderReview(){
           <div class="ri-q">${escapeHtml(item.question_text)}</div>
           <div class="ri-ans">Jawaban bidadari: <b>${escapeHtml(item.student_answer ?? '-')}</b> &nbsp;·&nbsp; Jawaban benar: <b>${escapeHtml(item.correct_answer ?? '-')}</b> &nbsp;·&nbsp; ⏱ <b>${formatDurationAdmin(item.time_ms)}</b></div>
           <div class="review-actions">
-            <button class="status-btn benar ${st==='benar'?'active':''}" data-action="mark" data-status="benar" data-id="${item.id}">✓ Benar</button>
-            <button class="status-btn salah ${st==='salah'?'active':''}" data-action="mark" data-status="salah" data-id="${item.id}">✗ Salah</button>
+            <button class="status-btn benar ${st==='benar'?'active':''}" data-action="mark" data-status="benar" data-id="${item.id}">Benar</button>
+            <button class="status-btn salah ${st==='salah'?'active':''}" data-action="mark" data-status="salah" data-id="${item.id}">Salah</button>
           </div>
           <div class="review-note-row">
             <textarea placeholder="Catatan buat bidadari (opsional)" data-note-id="${item.id}">${escapeHtml(item.admin_note || '')}</textarea>
@@ -380,12 +380,12 @@ function renderReview(){
         <div class="session-header">
           <div data-action="toggle-session" data-session="${sess.session_id}" style="display:flex; align-items:center; gap:10px; flex:1; min-width:0; cursor:pointer; flex-wrap:wrap;">
             <span class="s-op">${OP_LABEL_REVIEW[sess.operation] || sess.operation || '-'}</span>
-            ${sess.username ? `<span class="user-badge">👤 ${escapeHtml(sess.username)}</span>` : ''}
+            ${sess.username ? `<span class="user-badge">${escapeHtml(sess.username)}</span>` : ''}
             <span class="s-date">${formatDateAdmin(sess.date)} · ⏱ ${formatDurationAdmin(roundTotalMs)}</span>
             <span class="s-score">${benarCount}/${sess.items.length}</span>
             <span class="chevron">▼</span>
           </div>
-          <button class="status-btn" data-action="delete-session" data-session="${sess.session_id}" style="background:#FFEDEB; color:var(--coral-dark); flex-shrink:0;">🗑️</button>
+          <button class="status-btn" data-action="delete-session" data-session="${sess.session_id}" style="background:#FFEDEB; color:var(--coral-dark); flex-shrink:0;">Hapus</button>
         </div>
         <div class="session-body">${itemsHtml}</div>
       </div>
@@ -411,7 +411,7 @@ function renderReview(){
 }
 
 async function deleteSession(sessionId){
-  if(!confirm('Hapus semua jawaban di sesi ini? Gak bisa dibalikin lagi.')) return;
+  if(!confirm('Hapus seluruh jawaban pada sesi ini? Tindakan ini tidak dapat dibatalkan.')) return;
   const { error } = await sb.from('submissions').delete().eq('session_id', sessionId);
   if(error){ alert('Gagal hapus: ' + error.message); return; }
   allSubmissions = allSubmissions.filter(x => x.session_id !== sessionId);
@@ -420,8 +420,8 @@ async function deleteSession(sessionId){
 }
 
 document.getElementById('clearAllReviewBtn').addEventListener('click', async () => {
-  if(allSubmissions.length === 0){ alert('Belum ada riwayat jawaban buat dihapus.'); return; }
-  const step1 = confirm(`Yakin mau hapus SEMUA riwayat jawaban (${allSubmissions.length} jawaban dari semua sesi)? Ini gak kepengaruh ke soal-soal yang lo bikin, cuma riwayat jawaban bidadari doang.`);
+  if(allSubmissions.length === 0){ alert('Belum ada riwayat jawaban untuk dihapus.'); return; }
+  const step1 = confirm(`Yakin ingin menghapus SEMUA riwayat jawaban (${allSubmissions.length} jawaban dari seluruh sesi)? Soal yang tersimpan tidak terpengaruh, hanya riwayat jawaban bidadari yang akan terhapus.`);
   if(!step1) return;
   const typed = prompt('Ketik HAPUS (huruf besar semua) buat konfirmasi:');
   if(typed !== 'HAPUS'){ alert('Dibatalkan.'); return; }
@@ -430,12 +430,12 @@ document.getElementById('clearAllReviewBtn').addEventListener('click', async () 
   btn.textContent = 'Menghapus...';
   const { error } = await sb.from('submissions').delete().neq('id', '00000000-0000-0000-0000-000000000000');
   btn.disabled = false;
-  btn.textContent = '🗑️ Hapus Semua Riwayat';
+  btn.textContent = 'Hapus Semua Riwayat';
   if(error){ alert('Gagal hapus semua: ' + error.message); return; }
   allSubmissions = [];
   openSessions = {};
   renderReview();
-  alert('Semua riwayat jawaban udah dikosongin.');
+  alert('Seluruh riwayat jawaban telah dikosongkan.');
 });
 
 async function setAdminStatus(id, status){
@@ -453,7 +453,7 @@ async function saveNote(id){
   if(error){ alert('Gagal simpan catatan: ' + error.message); return; }
   const item = allSubmissions.find(x => x.id === id);
   if(item) item.admin_note = note;
-  alert('Catatan tersimpan.');
+  alert('Catatan berhasil disimpan.');
 }
 
 document.getElementById('refreshReviewBtn').addEventListener('click', loadSubmissions);
@@ -565,7 +565,7 @@ async function loadStarLog(){
 function renderStarLog(){
   const wrap = document.getElementById('starsWrap');
   if(starLog.length === 0){
-    wrap.innerHTML = `<div class="empty-state">Belum ada riwayat bintang harian. Nanti otomatis kecatat tiap ganti hari atau pas dihapus manual 🌱</div>`;
+    wrap.innerHTML = `<div class="empty-state">Belum ada riwayat bintang harian. Data akan tercatat otomatis setiap pergantian hari atau saat dihapus secara manual.</div>`;
     return;
   }
   wrap.innerHTML = starLog.map(row => `
@@ -574,10 +574,10 @@ function renderStarLog(){
         <div class="sl-day">${escapeHtml(row.day_name || '-')}</div>
         <div class="sl-date">${formatSqlDate(row.log_date)}</div>
       </div>
-      ${row.username ? `<span class="user-badge">👤 ${escapeHtml(row.username)}</span>` : ''}
-      <span class="star-log-badge ${row.reset_type}">${row.reset_type === 'manual' ? '✋ Manual' : '🌙 Otomatis'}</span>
-      <div class="star-log-count">⭐ ${row.star_count}</div>
-      <button class="status-btn" data-action="delete-star" data-id="${row.id}" style="background:#FFEDEB; color:var(--coral-dark);">🗑️</button>
+      ${row.username ? `<span class="user-badge">${escapeHtml(row.username)}</span>` : ''}
+      <span class="star-log-badge ${row.reset_type}">${row.reset_type === 'manual' ? 'Manual' : 'Otomatis'}</span>
+      <div class="star-log-count">${row.star_count}</div>
+      <button class="status-btn" data-action="delete-star" data-id="${row.id}" style="background:#FFEDEB; color:var(--coral-dark);">Hapus</button>
     </div>
   `).join('');
 
@@ -620,11 +620,11 @@ function renderStarRecord(){
   wrap.innerHTML = allStarRecords.map(rec => `
     <div class="star-log-row" data-record-username="${escapeHtml(rec.username)}">
       <div class="star-log-date">
-        <div class="sl-day">👤 ${escapeHtml(rec.username)}</div>
+        <div class="sl-day">${escapeHtml(rec.username)}</div>
         <div class="sl-date">${rec.best_day_name ? escapeHtml(rec.best_day_name) + ' · ' : ''}${rec.best_date ? formatSqlDate(rec.best_date) : '-'}</div>
       </div>
-      <div class="star-log-count">⭐ ${rec.best_star_count}</div>
-      <button class="status-btn" data-action="delete-record" data-username="${escapeHtml(rec.username)}" style="background:#FFEDEB; color:var(--coral-dark);">🗑️</button>
+      <div class="star-log-count">${rec.best_star_count}</div>
+      <button class="status-btn" data-action="delete-record" data-username="${escapeHtml(rec.username)}" style="background:#FFEDEB; color:var(--coral-dark);">Hapus</button>
     </div>
   `).join('');
 
@@ -634,7 +634,7 @@ function renderStarRecord(){
 }
 
 async function resetOneRecord(uname){
-  if(!confirm(`Reset rekor bintang punya "${uname}" ke 0? Riwayat bintang harian TIDAK ikut terhapus.`)) return;
+  if(!confirm(`Reset rekor bintang milik "${uname}" ke 0? Riwayat bintang harian tidak ikut terhapus.`)) return;
   const { error } = await sb.from('star_record').delete().eq('username', uname);
   if(error){ alert('Gagal reset rekor: ' + error.message); return; }
   allStarRecords = allStarRecords.filter(r => r.username !== uname);
@@ -642,8 +642,8 @@ async function resetOneRecord(uname){
 }
 
 document.getElementById('resetAllRecordsBtn').addEventListener('click', async () => {
-  if(allStarRecords.length === 0){ alert('Belum ada rekor buat direset.'); return; }
-  const step1 = confirm(`Reset SEMUA rekor bintang (${allStarRecords.length} orang) ke 0? Riwayat bintang harian TIDAK ikut terhapus.`);
+  if(allStarRecords.length === 0){ alert('Belum ada rekor untuk direset.'); return; }
+  const step1 = confirm(`Reset SEMUA rekor bintang (${allStarRecords.length} pengguna) ke 0? Riwayat bintang harian tidak ikut terhapus.`);
   if(!step1) return;
   const typed = prompt('Ketik HAPUS (huruf besar semua) buat konfirmasi:');
   if(typed !== 'HAPUS'){ alert('Dibatalkan.'); return; }
@@ -670,10 +670,10 @@ async function loadUserProgress(){
   wrap.innerHTML = users.map(u => `
     <div class="star-log-row">
       <div class="star-log-date">
-        <div class="sl-day">👤 ${escapeHtml(u.username)}</div>
+        <div class="sl-day">${escapeHtml(u.username)}</div>
         <div class="sl-date">Update terakhir: ${new Date(u.updated_at).toLocaleString('id-ID', {dateStyle:'medium', timeStyle:'short'})}</div>
       </div>
-      <div class="star-log-count">⭐ ${u.total_stars} <span style="font-size:11px; color:var(--ink-soft); font-weight:700;">hari ini</span></div>
+      <div class="star-log-count">${u.total_stars} <span style="font-size:11px; color:var(--ink-soft); font-weight:700;">hari ini</span></div>
     </div>
   `).join('');
 }

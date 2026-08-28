@@ -4,30 +4,30 @@
    ============================================================ */
 
 :root{
-  --sky-top:#BFE9FF;
-  --sky-bottom:#EAF9FF;
-  --sun:#FFC93C;
-  --sun-dark:#E8A317;
-  --leaf:#4CAF7D;
-  --leaf-dark:#379563;
-  --coral:#FF6B5B;
-  --coral-dark:#E14C3C;
-  --berry:#8B6FCB;
-  --berry-dark:#6F52AE;
-  --ink:#2B3A55;
-  --ink-soft:#5A6B8C;
+  --sky-top:#DCEAF5;
+  --sky-bottom:#EEF3F8;
+  --sun:#D9A94E;
+  --sun-dark:#B8873A;
+  --leaf:#4A9B76;
+  --leaf-dark:#357657;
+  --coral:#C96E62;
+  --coral-dark:#A8534A;
+  --berry:#7E6BA8;
+  --berry-dark:#635189;
+  --ink:#2B3540;
+  --ink-soft:#647082;
   --card:#FFFFFF;
-  --line:#DCEBF5;
+  --line:#E1E6EC;
 }
 
 *{box-sizing:border-box;}
 html, body{margin:0; padding:0; max-width:100%; overflow-x:hidden;}
 body{
-  font-family:'Nunito', sans-serif;
+  font-family:'Inter', sans-serif;
   color:var(--ink);
   -webkit-font-smoothing:antialiased;
 }
-h1, h2, h3{font-family:'Baloo 2', sans-serif; margin:0;}
+h1, h2, h3{font-family:'Plus Jakarta Sans', sans-serif; margin:0; font-weight:700;}
 button, select, input, textarea{font-family:inherit;}
 button{cursor:pointer;}
 button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible{

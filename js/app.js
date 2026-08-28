@@ -284,14 +284,14 @@ async function generateRound(chosenOp){
 /* ---------------- Visual renderers ---------------- */
 function iconRow(count, extraClass){
   let out = '';
-  for(let i=0;i<count;i++) out += `<span class="ic ${extraClass||''}">🍎</span>`;
+  for(let i=0;i<count;i++) out += `<span class="ic ${extraClass||''}"></span>`;
   return out;
 }
 
 function renderVisual(q){
   if(q.isCustom){
     if(q.note) return `<div class="compact-visual">${escapeHtml(q.note)}</div>`;
-    return `<div class="compact-visual"><span class="big">✨</span>Soal spesial dari kakak!</div>`;
+    return `<div class="compact-visual">Soal tambahan dari admin.</div>`;
   }
   const {op,a,b} = q;
   if(op === 'tambah' || op === 'kurang'){
@@ -351,27 +351,27 @@ function stopLiveTimer(){
 
 /* ---------------- Sidebar ---------------- */
 function sidebarHtml(){
-  const navItem = (screen, icon, label) => `
+  const navItem = (screen, label) => `
     <button class="nav-item ${state.screen === screen ? 'active':''}" data-nav="${screen}">
-      <span class="ic">${icon}</span><span>${label}</span>
+      <span>${label}</span>
     </button>`;
 
   return `
     <div class="sidebar-backdrop ${state.sidebarOpen ? 'show':''}" id="sidebarBackdrop"></div>
     <div class="sidebar ${state.sidebarOpen ? 'open':''}" id="sidebar">
-      <button class="hamburger-btn" id="hamburgerBtn">☰</button>
+      <button class="hamburger-btn" id="hamburgerBtn" aria-label="Menu"><span class="hamburger-lines"></span></button>
       <div class="sidebar-content">
         <div class="sidebar-title"><h1>Matematika</h1></div>
         <span class="sidebar-badge">Senyum Kenangan</span>
         <ul class="nav-list" style="list-style:none; padding:0; margin:0 0 24px; display:flex; flex-direction:column; gap:4px;">
-          <li>${navItem('home','🏠','Main')}</li>
-          <li>${navItem('riwayat','📜','Riwayat Soal')}</li>
-          <li>${navItem('topscore','🏆','Topscore')}</li>
-          <li><a class="nav-item" href="admin.html"><span class="ic">🔐</span><span>Menu Admin</span></a></li>
+          <li>${navItem('home','Beranda')}</li>
+          <li>${navItem('riwayat','Riwayat Soal')}</li>
+          <li>${navItem('topscore','Topscore')}</li>
+          <li><a class="nav-item" href="admin.html"><span>Menu Admin</span></a></li>
         </ul>
         <div class="sidebar-footer">
-          <img class="sidebar-mini-avatar" src="assets/senyum-kenangan.jpg" alt="Ichan & Michell">
-          <span class="sidebar-tagline">Semangat belajarnya, sayangku 💕</span>
+          <img class="sidebar-mini-avatar" src="assets/senyum-kenangan.jpg" alt="Ichan dan Michell">
+          <span class="sidebar-tagline">Semangat belajarnya, sayangku</span>
         </div>
       </div>
     </div>
@@ -393,12 +393,11 @@ function mainHtml(){
 function welcomeScreen(){
   return `
     <div class="card" style="text-align:center; margin-top:60px;">
-      <div style="font-size:44px; margin-bottom:10px;">🐰</div>
-      <h2 style="margin-bottom:6px;">Siapa namamu?</h2>
-      <div class="subtitle" style="margin-bottom:18px;">Biar keliatan bintang & jawabannya punya siapa ya</div>
+      <h2 style="margin-bottom:6px;">Siapa nama kamu?</h2>
+      <div class="subtitle" style="margin-bottom:18px;">Nama ini digunakan untuk menyimpan bintang dan riwayat jawaban kamu.</div>
       <input type="text" id="usernameInput" placeholder="Nama kamu" maxlength="40"
         style="width:100%; padding:14px; border-radius:16px; border:2px solid rgba(255,255,255,0.15); background:rgba(0,0,0,0.25); color:#fff; font-size:18px; text-align:center; margin-bottom:14px;">
-      <button class="start-btn" id="saveUsernameBtn">Mulai Main</button>
+      <button class="start-btn" id="saveUsernameBtn">Mulai</button>
     </div>
   `;
 }
@@ -406,19 +405,19 @@ function welcomeScreen(){
 /* ---------------- Home ---------------- */
 function homeScreen(){
   return `
-    <div class="brand"><span class="mascot">🐰</span><h1>Matematika Dasar</h1><div class="stars">⭐ ${totalStars}</div></div>
-    <div class="subtitle">Halo ${escapeHtml(username || 'bidadari')}! Ayo berhitung sambil main di kebun buah! <button id="changeNameBtn" style="background:none; border:none; color:var(--gold); font-weight:800; font-size:12px; cursor:pointer; text-decoration:underline; padding:0;">Ganti nama</button></div>
+    <div class="brand"><h1>Matematika Dasar</h1><div class="stars">${totalStars} Bintang</div></div>
+    <div class="subtitle">Selamat datang, ${escapeHtml(username || 'bidadari')}. <button id="changeNameBtn" style="background:none; border:none; color:var(--gold); font-weight:700; font-size:12px; cursor:pointer; text-decoration:underline; padding:0;">Ganti nama</button></div>
     <div class="card">
-      <h2 style="font-size:18px;">Pilih materi</h2>
+      <h2 style="font-size:18px;">Pilih Kategori</h2>
       <div class="op-grid">
         <button class="op-card" data-op="tambah"><span class="sym">+</span>Tambah</button>
         <button class="op-card" data-op="kurang"><span class="sym">−</span>Kurang</button>
         <button class="op-card" data-op="kali"><span class="sym">×</span>Kali</button>
         <button class="op-card" data-op="bagi"><span class="sym">÷</span>Bagi</button>
-        <button class="op-card campur" data-op="campur"><span class="sym">🌈</span>Campuran</button>
+        <button class="op-card campur" data-op="campur">Campuran</button>
       </div>
-      <button class="start-btn" id="startBtn" disabled>Mulai Berpetualang</button>
-      <div class="hint" id="homeHint">Pilih salah satu dulu ya, baru bisa mulai 🌻</div>
+      <button class="start-btn" id="startBtn" disabled>Mulai Latihan</button>
+      <div class="hint" id="homeHint">Pilih salah satu kategori terlebih dahulu untuk memulai.</div>
     </div>
   `;
 }
@@ -427,21 +426,21 @@ function homeScreen(){
 function quizScreen(){
   if(state.loading){
     return `
-      <div class="brand"><span class="mascot">🐰</span><h1 style="font-size:20px;">Matematika Dasar</h1><div class="stars">⭐ ${totalStars}</div></div>
-      <div class="card"><div class="loading-line">Menyiapkan soal... 🌱</div></div>
+      <div class="brand"><h1 style="font-size:20px;">Matematika Dasar</h1><div class="stars">${totalStars} Bintang</div></div>
+      <div class="card"><div class="loading-line">Menyiapkan soal, mohon tunggu.</div></div>
     `;
   }
   const q = state.questions[state.idx];
   const visual = renderVisual(q);
   const trail = state.slotResults.map((r,i) => {
-    if(i > state.idx) return '<span>🌱</span>';
-    if(r === true) return '<span class="done">🌸</span>';
-    if(r === false) return '<span class="done">🍂</span>';
-    return '<span>🌱</span>';
+    if(i > state.idx) return '<span class="dot"></span>';
+    if(r === true) return '<span class="dot correct"></span>';
+    if(r === false) return '<span class="dot incorrect"></span>';
+    return '<span class="dot"></span>';
   }).join('');
 
   return `
-    <div class="brand"><span class="mascot">🐰</span><h1 style="font-size:20px;">Matematika Dasar</h1><div class="stars">⭐ ${totalStars}</div></div>
+    <div class="brand"><h1 style="font-size:20px;">Matematika Dasar</h1><div class="stars">${totalStars} Bintang</div></div>
     <div class="trail">${trail}</div>
     <div class="card">
       <div class="quiz-top">
@@ -449,17 +448,16 @@ function quizScreen(){
         <span class="qnum">Soal ${state.idx+1} / 10</span>
       </div>
       <div class="timer-row">
-        <span class="timer-chip">⏱ Soal ini: <b id="qTimer">${formatDuration(Date.now() - (state.questionStartTime || Date.now()))}</b></span>
-        <span class="timer-chip">⏳ Total: <b id="roundTimer">${formatDuration(Date.now() - (state.roundStartTime || Date.now()))}</b></span>
+        <span class="timer-chip">Waktu soal: <b id="qTimer">${formatDuration(Date.now() - (state.questionStartTime || Date.now()))}</b></span>
+        <span class="timer-chip">Waktu total: <b id="roundTimer">${formatDuration(Date.now() - (state.roundStartTime || Date.now()))}</b></span>
       </div>
       <div class="question-text">${questionText(q)}</div>
       ${visual ? `<div class="visual-box">${visual}</div>` : ''}
       <div class="answer-row">
-        <input type="number" inputmode="numeric" id="answerInput" placeholder="Jawabanmu" autocomplete="off" ${state.answered?'disabled':''}>
+        <input type="number" inputmode="numeric" id="answerInput" placeholder="Jawaban kamu" autocomplete="off" ${state.answered?'disabled':''}>
       </div>
-      <button class="check-btn ${state.answered?'next':''}" id="actionBtn">${state.answered ? (state.idx===9 ? 'Lihat Hasil' : 'Soal Berikutnya') : 'Cek Jawaban'}</button>
+      <button class="check-btn ${state.answered?'next':''}" id="actionBtn">${state.answered ? (state.idx===9 ? 'Lihat Hasil' : 'Soal Berikutnya') : 'Periksa Jawaban'}</button>
       <div class="feedback ${state.answered ? 'show '+(state.lastCorrect?'correct':'incorrect') : ''}" id="feedbackBox">
-        <span class="face">${state.lastCorrect ? '🎉' : '💪'}</span>
         <span>${state.feedbackMsg || ''}</span>
       </div>
     </div>
@@ -469,23 +467,22 @@ function quizScreen(){
 /* ---------------- Result ---------------- */
 function resultScreen(){
   const score = state.correctCount;
-  let emoji='🌟', title='Kerja bagus!';
-  if(score === 10){ emoji='🏆'; title='Sempurna banget!'; }
-  else if(score >= 7){ emoji='🌟'; title='Hebat sekali!'; }
-  else if(score >= 4){ emoji='🌼'; title='Terus berlatih ya!'; }
-  else { emoji='🌱'; title='Yuk coba lagi, pasti bisa!'; }
+  let title='Latihan selesai.';
+  if(score === 10){ title='Sempurna.'; }
+  else if(score >= 7){ title='Hasil yang sangat baik.'; }
+  else if(score >= 4){ title='Teruslah berlatih.'; }
+  else { title='Coba lagi, kamu pasti bisa.'; }
 
   return `
-    <div class="brand"><span class="mascot">🐰</span><h1 style="font-size:20px;">Matematika Dasar</h1><div class="stars">⭐ ${totalStars}</div></div>
+    <div class="brand"><h1 style="font-size:20px;">Matematika Dasar</h1><div class="stars">${totalStars} Bintang</div></div>
     <div class="card">
-      <div class="result-emoji">${emoji}</div>
       <div class="result-title">${title}</div>
-      <div class="result-sub">Materi: ${state.chosenOp === 'campur' ? 'Campuran' : OP_LABELS[state.chosenOp].label}</div>
+      <div class="result-sub">Kategori: ${state.chosenOp === 'campur' ? 'Campuran' : OP_LABELS[state.chosenOp].label}</div>
       <div class="result-score">${score} / 10</div>
-      <div class="result-stars">Kamu dapat ${score} ⭐ baru</div>
+      <div class="result-stars">Kamu memperoleh ${score} bintang baru</div>
       <div class="result-actions">
         <button class="start-btn" id="playAgainBtn">Main Lagi</button>
-        <button class="check-btn" id="homeBtn" style="background:rgba(255,255,255,0.1); box-shadow:0 5px 0 rgba(0,0,0,0.25);">Ganti Materi</button>
+        <button class="check-btn" id="homeBtn" style="background:rgba(255,255,255,0.1); box-shadow:0 5px 0 rgba(0,0,0,0.25);">Ganti Kategori</button>
       </div>
     </div>
   `;
@@ -496,20 +493,20 @@ function riwayatScreen(){
   const history = loadHistory();
   let body;
   if(history.length === 0){
-    body = `<div class="empty-state">Belum ada riwayat main. Yuk mulai belajar dulu! 🌱</div>`;
+    body = `<div class="empty-state">Belum ada riwayat latihan. Mulai latihan pertama kamu.</div>`;
   } else {
     body = `<div class="history-list">${history.slice(0,50).map(h => `
       <div class="history-item">
         <span class="h-op">${h.op === 'campur' ? 'Campuran' : (OP_LABELS[h.op] ? OP_LABELS[h.op].label : h.op)}</span>
-        <div class="h-info"><div class="h-date">${formatDate(h.date)} · ⏱ ${formatDuration(h.timeMs)}</div></div>
+        <div class="h-info"><div class="h-date">${formatDate(h.date)} · ${formatDuration(h.timeMs)}</div></div>
         <div class="h-score">${h.score}/${h.total}</div>
       </div>
     `).join('')}</div>`;
   }
   return `
-    <div class="brand"><span class="mascot">📜</span><h1 style="font-size:20px;">Riwayat Soal</h1><div class="stars">⭐ ${totalStars}</div></div>
-    <div class="subtitle">Semua percobaan yang udah kamu kerjain</div>
-    ${history.length > 0 ? `<button class="check-btn" id="clearHistoryBtn" style="background:rgba(255,107,91,0.18); box-shadow:0 5px 0 rgba(255,107,91,0.3); color:#FF9585; margin-bottom:16px;">🗑️ Hapus Riwayat & Bintang</button>` : ''}
+    <div class="brand"><h1 style="font-size:20px;">Riwayat Soal</h1><div class="stars">${totalStars} Bintang</div></div>
+    <div class="subtitle">Seluruh riwayat latihan yang telah kamu selesaikan.</div>
+    ${history.length > 0 ? `<button class="check-btn" id="clearHistoryBtn" style="background:rgba(255,107,91,0.18); box-shadow:0 5px 0 rgba(255,107,91,0.3); color:#FF9585; margin-bottom:16px;">Hapus Riwayat dan Bintang</button>` : ''}
     <div class="card">${body}</div>
   `;
 }
@@ -535,13 +532,13 @@ function topscoreScreen(){
 
   const top5 = history.slice().sort((a,b) => b.score - a.score || new Date(b.date)-new Date(a.date)).slice(0,5);
   const leaderboard = top5.length === 0
-    ? `<div class="empty-state">Belum ada percobaan buat dirangking.</div>`
+    ? `<div class="empty-state">Belum ada data untuk ditampilkan.</div>`
     : top5.map((h,i) => `
       <div class="leaderboard-row">
         <span class="rank">${i+1}</span>
         <div class="lb-info">
           <div class="lb-op">${h.op === 'campur' ? 'Campuran' : (OP_LABELS[h.op] ? OP_LABELS[h.op].label : h.op)}</div>
-          <div class="lb-date">${formatDate(h.date)} · ⏱ ${formatDuration(h.timeMs)}</div>
+          <div class="lb-date">${formatDate(h.date)} · ${formatDuration(h.timeMs)}</div>
         </div>
         <div class="lb-score">${h.score}/10</div>
       </div>
@@ -549,19 +546,19 @@ function topscoreScreen(){
 
   const starRecordHtml = `
     <div class="topscore-section">
-      <h3 style="margin-bottom:10px;">⭐ Rekor Bintang Tertinggi</h3>
+      <h3 style="margin-bottom:10px;">Rekor Bintang Tertinggi</h3>
       <div class="card" style="text-align:center; padding:22px;">
         ${cachedStarRecord && cachedStarRecord.best_star_count > 0 ? `
-          <div class="result-score" style="margin-bottom:4px;">⭐ ${cachedStarRecord.best_star_count}</div>
+          <div class="result-score" style="margin-bottom:4px;">${cachedStarRecord.best_star_count}</div>
           <div class="result-sub" style="margin-bottom:0;">${cachedStarRecord.best_day_name || ''}${cachedStarRecord.best_day_name ? ' · ' : ''}${formatSqlDateClient(cachedStarRecord.best_date)}</div>
-        ` : `<div class="empty-state">Belum ada rekor. Kumpulin bintang buat pecahin rekor pertamamu!</div>`}
+        ` : `<div class="empty-state">Belum ada rekor. Kumpulkan bintang untuk mencatatkan rekor pertamamu.</div>`}
       </div>
     </div>
   `;
 
   return `
-    <div class="brand"><span class="mascot">🏆</span><h1 style="font-size:20px;">Topscore</h1><div class="stars">⭐ ${totalStars}</div></div>
-    <div class="subtitle">Skor terbaik kamu di tiap materi</div>
+    <div class="brand"><h1 style="font-size:20px;">Topscore</h1><div class="stars">${totalStars} Bintang</div></div>
+    <div class="subtitle">Skor terbaik kamu di setiap kategori.</div>
     ${starRecordHtml}
     <div class="topscore-section">
       <div class="topscore-grid">${cards}</div>
@@ -606,7 +603,7 @@ function attachHandlers(){
   const clearHistoryBtn = document.getElementById('clearHistoryBtn');
   if(clearHistoryBtn){
     clearHistoryBtn.addEventListener('click', () => {
-      if(!confirm('Hapus semua riwayat soal DAN bintangnya juga? Ini beneran ngehapus data kamu (nama: ' + (username||'-') + ') dari server, gak cuma HP ini. Data jawaban di panel "Koreksi Jawaban" admin tetep aman, cuma riwayat skor & bintang yang kehapus.')) return;
+      if(!confirm('Hapus seluruh riwayat soal dan bintang untuk pengguna dengan nama "' + (username||'-') + '"? Data ini akan dihapus dari server, bukan hanya perangkat ini. Data jawaban pada panel Koreksi Jawaban di dashboard admin tidak terpengaruh.')) return;
       logDailyStars(todayStr(), totalStars, 'manual');
       localStorage.removeItem(HISTORY_KEY);
       localStorage.removeItem(STORAGE_KEY);
