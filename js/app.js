@@ -164,7 +164,9 @@ let state = {
   slotResults: [],
   loading: false,
   sidebarOpen: false,
-  timerInterval: null
+  timerInterval: null,
+  roundAccumulatedMs: 0,
+  lastQuestionTimeMs: 0
 };
 
 const OP_LABELS = {
@@ -335,14 +337,12 @@ function render(){
 function startLiveTimer(){
   stopLiveTimer();
   state.timerInterval = setInterval(() => {
+    if(state.answered) return; // jeda total, gak update apa-apa selama nunggu klik lanjut
     const qEl = document.getElementById('qTimer');
     const rEl = document.getElementById('roundTimer');
-    if(qEl && !state.answered){
-      qEl.textContent = formatDuration(Date.now() - (state.questionStartTime || Date.now()));
-    }
-    if(rEl){
-      rEl.textContent = formatDuration(Date.now() - (state.roundStartTime || Date.now()));
-    }
+    const currentSegment = Date.now() - (state.questionStartTime || Date.now());
+    if(qEl) qEl.textContent = formatDuration(currentSegment);
+    if(rEl) rEl.textContent = formatDuration(state.roundAccumulatedMs + currentSegment);
   }, 1000);
 }
 function stopLiveTimer(){
@@ -439,6 +439,10 @@ function quizScreen(){
     return '<span class="dot"></span>';
   }).join('');
 
+  const liveSegment = state.answered ? 0 : (Date.now() - (state.questionStartTime || Date.now()));
+  const qDisplayMs = state.answered ? state.lastQuestionTimeMs : liveSegment;
+  const roundDisplayMs = state.roundAccumulatedMs + liveSegment;
+
   return `
     <div class="brand"><h1 style="font-size:20px;">Matematika Dasar</h1><div class="stars">${totalStars} Bintang</div></div>
     <div class="trail">${trail}</div>
@@ -448,8 +452,8 @@ function quizScreen(){
         <span class="qnum">Soal ${state.idx+1} / 10</span>
       </div>
       <div class="timer-row">
-        <span class="timer-chip">Waktu soal: <b id="qTimer">${formatDuration(Date.now() - (state.questionStartTime || Date.now()))}</b></span>
-        <span class="timer-chip">Waktu total: <b id="roundTimer">${formatDuration(Date.now() - (state.roundStartTime || Date.now()))}</b></span>
+        <span class="timer-chip">Waktu soal: <b id="qTimer">${formatDuration(qDisplayMs)}</b></span>
+        <span class="timer-chip">Waktu total: <b id="roundTimer">${formatDuration(roundDisplayMs)}</b></span>
       </div>
       <div class="question-text">${questionText(q)}</div>
       ${visual ? `<div class="visual-box">${visual}</div>` : ''}
@@ -669,7 +673,8 @@ function attachHandlers(){
       render();
       state.questions = await generateRound(state.chosenOp);
       state.loading = false;
-      state.roundStartTime = Date.now();
+      state.roundAccumulatedMs = 0;
+      state.lastQuestionTimeMs = 0;
       state.questionStartTime = Date.now();
       render();
     });
@@ -691,6 +696,8 @@ function attachHandlers(){
         const q = state.questions[state.idx];
         const correct = parseInt(val,10) === q.answer;
         const questionTimeMs = Date.now() - (state.questionStartTime || Date.now());
+        state.lastQuestionTimeMs = questionTimeMs;
+        state.roundAccumulatedMs += questionTimeMs;
         state.answered = true;
         state.lastCorrect = correct;
         state.slotResults[state.idx] = correct;
@@ -720,7 +727,7 @@ function attachHandlers(){
         render();
       } else {
         if(state.idx === 9){
-          const roundTimeMs = Date.now() - (state.roundStartTime || Date.now());
+          const roundTimeMs = state.roundAccumulatedMs;
           saveHistoryEntry(state.chosenOp, state.correctCount, roundTimeMs);
           if(sb && state.sessionId){
             sb.from('submissions').update({ round_total_ms: roundTimeMs }).eq('session_id', state.sessionId)
@@ -749,7 +756,8 @@ function attachHandlers(){
       render();
       state.questions = await generateRound(state.chosenOp);
       state.loading = false;
-      state.roundStartTime = Date.now();
+      state.roundAccumulatedMs = 0;
+      state.lastQuestionTimeMs = 0;
       state.questionStartTime = Date.now();
       render();
     });
