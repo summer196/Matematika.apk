@@ -281,6 +281,22 @@ body::before{
 .vocab-actions .start-btn{flex:1; margin-top:0;}
 .vocab-actions .check-btn{flex:1;}
 
+/* ---------------- Latihan Terjemahan ---------------- */
+.trans-question{
+  font-family:'Plus Jakarta Sans',sans-serif; font-size:24px; color:#fff; text-align:center;
+  margin:6px 0 22px; line-height:1.35;
+}
+.trans-options{display:flex; flex-direction:column; gap:10px;}
+.trans-option{
+  width:100%; text-align:left; padding:14px 16px; border-radius:14px;
+  border:1.5px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.05);
+  color:#F4EDE9; font-size:15px; font-weight:600; font-family:inherit;
+  transition:background .12s ease, border-color .12s ease;
+}
+.trans-option:not(:disabled):active{transform:translateY(1px);}
+.trans-option.correct{background:rgba(126,217,160,0.18); border-color:#7ED9A0; color:#7ED9A0;}
+.trans-option.incorrect{background:rgba(255,107,91,0.18); border-color:#FF6B5B; color:#FF9585;}
+
 @media (max-width:640px){
   .sidebar{ width:56px; }
   .sidebar.open{ width:min(290px, 82vw); }

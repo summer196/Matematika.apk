@@ -33,6 +33,7 @@
     <button class="admin-tab active" data-tab="ringkasan">Dashboard</button>
     <button class="admin-tab" data-tab="soal">Kelola Soal</button>
     <button class="admin-tab" data-tab="kosakata">Kosakata Inggris</button>
+    <button class="admin-tab" data-tab="terjemahan">Latihan Terjemahan</button>
     <button class="admin-tab" data-tab="koreksi">Koreksi Jawaban</button>
     <button class="admin-tab" data-tab="bintang">Riwayat Bintang</button>
     <button class="admin-tab" data-tab="pengguna">Data Pengguna</button>
@@ -153,6 +154,50 @@
         <button id="vResetAllBtn" class="reset-btn">Kosongkan Semua Kata</button>
       </div>
       <div id="vTableWrap"><div class="loading-line">Memuat kosakata...</div></div>
+    </div>
+  </div>
+
+  <!-- ================= TAB: Latihan Terjemahan ================= -->
+  <div class="tab-panel" data-tab-panel="terjemahan">
+    <div class="panel">
+      <h2>Tambah Soal Terjemahan</h2>
+      <div class="sub-note">Isi salah satu sisi dulu, terus pencet tombol terjemahin otomatis (pakai MyMemory, gratis) buat isi sisi satunya. Boleh juga diedit manual.</div>
+      <div class="form-grid">
+        <div class="field full">
+          <label>Kalimat Indonesia</label>
+          <textarea id="tTextId" placeholder="Contoh: Saya suka belajar bahasa Inggris."></textarea>
+          <button type="button" class="reset-btn" id="tTranslateToEnBtn" style="background:#EAF0FF; color:var(--berry-dark); margin-top:8px;">Terjemahin ke Inggris →</button>
+        </div>
+        <div class="field full">
+          <label>English Sentence</label>
+          <textarea id="tTextEn" placeholder="Example: I like learning English."></textarea>
+          <button type="button" class="reset-btn" id="tTranslateToIdBtn" style="background:#EAF0FF; color:var(--berry-dark); margin-top:8px;">← Terjemahin ke Indonesia</button>
+        </div>
+        <div class="field">
+          <label>Level</label>
+          <select id="tLevel">
+            <option value="A1">A1</option>
+            <option value="A2" selected>A2</option>
+            <option value="B1">B1</option>
+            <option value="B2">B2</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Kategori (opsional)</label>
+          <input type="text" id="tCategory" placeholder="Contoh: Sehari-hari">
+        </div>
+      </div>
+      <button class="submit-btn" id="tSubmitBtn">Simpan Soal</button>
+      <div class="form-msg" id="tFormMsg"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header-row">
+        <h2>Daftar Soal Terjemahan</h2>
+        <button id="tResetAllBtn" class="reset-btn">Kosongkan Semua Soal</button>
+      </div>
+      <div class="sub-note">Minimal butuh 4 soal aktif biar pilihan ganda di aplikasi bisa muncul.</div>
+      <div id="tTableWrap"><div class="loading-line">Memuat soal terjemahan...</div></div>
     </div>
   </div>
 
@@ -289,6 +334,39 @@
     <div class="modal-actions">
       <button class="modal-cancel-btn" id="evCancelBtn">Batal</button>
       <button class="submit-btn" id="evSaveBtn">Simpan Perubahan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Edit Soal Terjemahan -->
+<div class="modal-overlay" id="editTransModal">
+  <div class="modal-box">
+    <h2>Edit Soal Terjemahan</h2>
+    <div class="field">
+      <label>Kalimat Indonesia</label>
+      <textarea id="etTextId"></textarea>
+    </div>
+    <div class="field">
+      <label>English Sentence</label>
+      <textarea id="etTextEn"></textarea>
+    </div>
+    <div class="field">
+      <label>Level</label>
+      <select id="etLevel">
+        <option value="A1">A1</option>
+        <option value="A2">A2</option>
+        <option value="B1">B1</option>
+        <option value="B2">B2</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Kategori</label>
+      <input type="text" id="etCategory">
+    </div>
+    <div class="form-msg" id="etMsg"></div>
+    <div class="modal-actions">
+      <button class="modal-cancel-btn" id="etCancelBtn">Batal</button>
+      <button class="submit-btn" id="etSaveBtn">Simpan Perubahan</button>
     </div>
   </div>
 </div>
