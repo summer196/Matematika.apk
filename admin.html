@@ -32,6 +32,7 @@
   <div class="admin-tabs" id="adminTabs">
     <button class="admin-tab active" data-tab="ringkasan">Dashboard</button>
     <button class="admin-tab" data-tab="soal">Kelola Soal</button>
+    <button class="admin-tab" data-tab="kosakata">Kosakata Inggris</button>
     <button class="admin-tab" data-tab="koreksi">Koreksi Jawaban</button>
     <button class="admin-tab" data-tab="bintang">Riwayat Bintang</button>
     <button class="admin-tab" data-tab="pengguna">Data Pengguna</button>
@@ -100,6 +101,58 @@
         <button data-filter="bagi">Bagi</button>
       </div>
       <div id="tableWrap"><div class="loading-line">Memuat soal...</div></div>
+    </div>
+  </div>
+
+  <!-- ================= TAB: Kosakata Inggris ================= -->
+  <div class="tab-panel" data-tab-panel="kosakata">
+    <div class="panel">
+      <h2>Tambah Kata Baru</h2>
+      <div class="form-grid">
+        <div class="field">
+          <label>Kata (Inggris)</label>
+          <input type="text" id="vWord" placeholder="Contoh: grateful">
+        </div>
+        <div class="field">
+          <label>Pengucapan (IPA, opsional)</label>
+          <input type="text" id="vIpa" placeholder="Contoh: /ˈɡreɪtfl/">
+        </div>
+        <div class="field">
+          <label>Jenis kata (opsional)</label>
+          <input type="text" id="vPos" placeholder="Contoh: adjective">
+        </div>
+        <div class="field">
+          <label>Level</label>
+          <select id="vLevel">
+            <option value="A1">A1</option>
+            <option value="A2" selected>A2</option>
+            <option value="B1">B1</option>
+            <option value="B2">B2</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Kategori</label>
+          <input type="text" id="vCategory" placeholder="Contoh: Perasaan, Kerja, Makanan">
+        </div>
+        <div class="field full">
+          <label>Arti (Bahasa Indonesia)</label>
+          <input type="text" id="vMeaning" placeholder="Contoh: bersyukur">
+        </div>
+        <div class="field full">
+          <label>Contoh kalimat (opsional)</label>
+          <textarea id="vExample" placeholder="Contoh: I'm grateful for your help."></textarea>
+        </div>
+      </div>
+      <button class="submit-btn" id="vSubmitBtn">Simpan Kata</button>
+      <div class="form-msg" id="vFormMsg"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header-row">
+        <h2>Daftar Kosakata</h2>
+        <button id="vResetAllBtn" class="reset-btn">Kosongkan Semua Kata</button>
+      </div>
+      <div id="vTableWrap"><div class="loading-line">Memuat kosakata...</div></div>
     </div>
   </div>
 
@@ -191,6 +244,51 @@
     <div class="modal-actions">
       <button class="modal-cancel-btn" id="editCancelBtn">Batal</button>
       <button class="submit-btn" id="editSaveBtn">Simpan Perubahan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Edit Kosakata -->
+<div class="modal-overlay" id="editVocabModal">
+  <div class="modal-box">
+    <h2>Edit Kata</h2>
+    <div class="field">
+      <label>Kata (Inggris)</label>
+      <input type="text" id="evWord">
+    </div>
+    <div class="field">
+      <label>Pengucapan (IPA)</label>
+      <input type="text" id="evIpa">
+    </div>
+    <div class="field">
+      <label>Jenis kata</label>
+      <input type="text" id="evPos">
+    </div>
+    <div class="field">
+      <label>Level</label>
+      <select id="evLevel">
+        <option value="A1">A1</option>
+        <option value="A2">A2</option>
+        <option value="B1">B1</option>
+        <option value="B2">B2</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Kategori</label>
+      <input type="text" id="evCategory">
+    </div>
+    <div class="field">
+      <label>Arti (Bahasa Indonesia)</label>
+      <input type="text" id="evMeaning">
+    </div>
+    <div class="field">
+      <label>Contoh kalimat</label>
+      <textarea id="evExample"></textarea>
+    </div>
+    <div class="form-msg" id="evMsg"></div>
+    <div class="modal-actions">
+      <button class="modal-cancel-btn" id="evCancelBtn">Batal</button>
+      <button class="submit-btn" id="evSaveBtn">Simpan Perubahan</button>
     </div>
   </div>
 </div>

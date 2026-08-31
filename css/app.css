@@ -261,6 +261,26 @@ body::before{
 
 .empty-state{text-align:center; padding:30px 10px; color:rgba(244,237,233,0.5); font-weight:700;}
 
+/* ---------------- Kosakata Inggris ---------------- */
+.vocab-filters{display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;}
+.vocab-filters select{
+  flex:1; min-width:130px; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,0.15);
+  background:rgba(0,0,0,0.25); color:#fff; font-size:13px; font-weight:600;
+}
+.vocab-badges{display:flex; gap:8px; margin-bottom:16px;}
+.vocab-badge{font-size:11px; font-weight:800; padding:4px 11px; border-radius:999px; text-transform:uppercase; letter-spacing:.3px;}
+.vocab-badge.level{background:rgba(201,165,103,0.18); color:var(--gold); border:1px solid rgba(201,165,103,0.4);}
+.vocab-badge.category{background:rgba(255,255,255,0.08); color:rgba(244,237,233,0.75); border:1px solid rgba(255,255,255,0.12); text-transform:none;}
+.vocab-word-row{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;}
+.vocab-word{font-family:'Plus Jakarta Sans',sans-serif; font-size:34px; font-weight:800; color:#fff;}
+.vocab-ipa{font-size:15px; color:rgba(244,237,233,0.55);}
+.vocab-pos{font-size:12px; font-style:italic; color:var(--gold); margin-top:4px; text-transform:capitalize;}
+.vocab-meaning{font-size:19px; color:#fff; margin-top:14px; font-weight:700;}
+.vocab-example{margin-top:12px; font-size:14px; color:rgba(244,237,233,0.6); font-style:italic; border-left:3px solid rgba(201,165,103,0.4); padding-left:12px;}
+.vocab-actions{display:flex; gap:10px; margin-top:22px;}
+.vocab-actions .start-btn{flex:1; margin-top:0;}
+.vocab-actions .check-btn{flex:1;}
+
 @media (max-width:640px){
   .sidebar{ width:56px; }
   .sidebar.open{ width:min(290px, 82vw); }
