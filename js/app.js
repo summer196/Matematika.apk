@@ -18,6 +18,18 @@ const HISTORY_KEY = 'kebunAngka_history';
 const STAR_DATE_KEY = 'kebunAngka_starDate';
 const USERNAME_KEY = 'kebunAngka_username';
 
+/* ---------------- Pengaturan tampilan (diatur admin, berlaku global) ---------------- */
+let timerDisplayEnabled = true; // default nyala selama belum kebaca dari server
+
+async function fetchAppSettings(){
+  if(!sb) return;
+  try{
+    const { data, error } = await sb.from('app_settings').select('*').eq('id', 1).maybeSingle();
+    if(error){ console.warn('Gagal ambil pengaturan tampilan:', error.message); return; }
+    if(data) timerDisplayEnabled = data.timer_enabled !== false;
+  }catch(e){ console.warn('Gagal ambil pengaturan tampilan:', e); }
+}
+
 let totalStars = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10);
 let username = localStorage.getItem(USERNAME_KEY) || '';
 
@@ -535,10 +547,12 @@ function quizScreen(){
         <button class="back" id="backBtn">← Kembali</button>
         <span class="qnum">Soal ${state.idx+1} / 10</span>
       </div>
+      ${timerDisplayEnabled ? `
       <div class="timer-row">
         <span class="timer-chip">Waktu soal: <b id="qTimer">${formatDuration(qDisplayMs)}</b></span>
         <span class="timer-chip">Waktu total: <b id="roundTimer">${formatDuration(roundDisplayMs)}</b></span>
       </div>
+      ` : ''}
       <div class="question-text">${questionText(q)}</div>
       ${visual ? `<div class="visual-box">${visual}</div>` : ''}
       <div class="answer-row">
@@ -1024,6 +1038,7 @@ function attachHandlers(){
 }
 
 async function initApp(){
+  await fetchAppSettings();
   if(username && sb){
     // Kalau localStorage kosong (cache/HP baru di-reset) tapi nama udah ada,
     // coba restore progress dari server dulu sebelum nentuin reset harian.

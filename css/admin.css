@@ -103,6 +103,16 @@ tbody tr:last-child td{border-bottom:none;}
 .empty-state{text-align:center; padding:30px 10px; color:var(--ink-soft); font-weight:700;}
 .loading-line{text-align:center; padding:20px; color:var(--ink-soft); font-weight:700;}
 
+.switch-row{display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 4px;}
+.switch-row-label{font-weight:700; color:var(--ink);}
+.switch-row-desc{font-size:12px; color:var(--ink-soft); font-weight:500; margin-top:2px;}
+.switch{position:relative; display:inline-block; width:46px; height:26px; flex-shrink:0;}
+.switch input{opacity:0; width:0; height:0;}
+.switch-slider{position:absolute; inset:0; background:#D9DEE8; border-radius:999px; cursor:pointer; transition:background .15s ease;}
+.switch-slider::before{content:''; position:absolute; width:20px; height:20px; left:3px; top:3px; background:#fff; border-radius:50%; transition:transform .15s ease; box-shadow:0 1px 3px rgba(0,0,0,0.2);}
+.switch input:checked + .switch-slider{background:var(--leaf-dark, #3FA96A);}
+.switch input:checked + .switch-slider::before{transform:translateX(20px);}
+
 /* ---- Edit modal (fitur koreksi) ---- */
 .modal-overlay{
   display:none; position:fixed; inset:0; background:rgba(43,58,85,0.45);

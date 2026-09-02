@@ -48,6 +48,7 @@ function tryUnlock(){
     loadUserProgress();
     loadVocab();
     loadTransItems();
+    loadAppSettings();
   } else {
     pinError.style.display = 'block';
     pinInput.value = '';
@@ -686,7 +687,40 @@ async function loadUserProgress(){
   `).join('');
 }
 
-/* ---------------- Kosakata Inggris (tab Kosakata Inggris) ---------------- */
+/* ---------------- Pengaturan Tampilan (timer global) ---------------- */
+async function loadAppSettings(){
+  const wrap = document.getElementById('timerToggleWrap');
+  if(!sb){ wrap.innerHTML = `<div class="empty-state">Supabase belum dikonfigurasi.</div>`; return; }
+
+  const { data, error } = await sb.from('app_settings').select('*').eq('id', 1).maybeSingle();
+  if(error){
+    wrap.innerHTML = `<div class="empty-state">Gagal memuat pengaturan: ${escapeHtml(error.message)}</div>`;
+    return;
+  }
+  const timerEnabled = data ? data.timer_enabled !== false : true;
+
+  wrap.innerHTML = `
+    <div class="switch-row">
+      <div>
+        <div class="switch-row-label">Tampilkan Timer Soal</div>
+        <div class="switch-row-desc">Kalau dimatikan, "Waktu soal" & "Waktu total" gak muncul pas ngerjain kuis Matematika.</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="timerToggleInput" ${timerEnabled ? 'checked' : ''}>
+        <span class="switch-slider"></span>
+      </label>
+    </div>
+  `;
+
+  document.getElementById('timerToggleInput').addEventListener('change', async (e) => {
+    const enabled = e.target.checked;
+    const { error: upErr } = await sb.from('app_settings').upsert([{ id: 1, timer_enabled: enabled }], { onConflict: 'id' });
+    if(upErr){
+      alert('Gagal simpan pengaturan: ' + upErr.message);
+      e.target.checked = !enabled;
+    }
+  });
+}
 async function loadVocab(){
   const wrap = document.getElementById('vTableWrap');
   if(!sb){ wrap.innerHTML = `<div class="empty-state">Supabase belum dikonfigurasi di supabase-config.js.</div>`; return; }
