@@ -942,7 +942,10 @@ function attachHandlers(){
           state.feedbackMsg = pick(ENCOURAGE_RIGHT);
           input.classList.add('right-glow');
         } else {
-          state.feedbackMsg = `${pick(ENCOURAGE_WRONG)} Jawaban yang benar: ${q.answer}`;
+          totalStars = Math.max(0, totalStars - 3);
+          localStorage.setItem(STORAGE_KEY, totalStars);
+          pushProgressToServer();
+          state.feedbackMsg = `${pick(ENCOURAGE_WRONG)} Jawaban yang benar: ${q.answer} (−3 bintang)`;
           input.classList.add('wrong-shake');
         }
         if(sb){
