@@ -1025,7 +1025,56 @@ document.getElementById('tTranslateToIdBtn').addEventListener('click', async () 
   btn.disabled = false; btn.textContent = '← Terjemahin ke Indonesia';
 });
 
-/* ---------------- Tambah soal terjemahan baru ---------------- */
+/* ---------------- Generate soal dari Kosakata ---------------- */
+document.getElementById('tGenerateBtn').addEventListener('click', async () => {
+  const msg = document.getElementById('tGenerateMsg');
+  const btn = document.getElementById('tGenerateBtn');
+
+  if(!allVocab || allVocab.length === 0){
+    msg.textContent = 'Belum ada kosakata di tab Kosakata Inggris.';
+    msg.className = 'form-msg err';
+    return;
+  }
+
+  const existingExamples = new Set(allTransItems.map(t => t.text_en.trim().toLowerCase()));
+  const candidates = allVocab.filter(v => v.example && v.example.trim() && !existingExamples.has(v.example.trim().toLowerCase()));
+
+  if(candidates.length === 0){
+    msg.textContent = 'Semua contoh kalimat dari kosakata sudah ada di bank soal terjemahan.';
+    msg.className = 'form-msg ok';
+    return;
+  }
+
+  btn.disabled = true;
+  let done = 0, failed = 0;
+  const total = candidates.length;
+
+  for(const v of candidates){
+    btn.textContent = `Menerjemahkan ${done + failed + 1}/${total}...`;
+    msg.textContent = `Sedang generate: "${v.example}"`;
+    msg.className = 'form-msg';
+    try{
+      const text_id = await callTranslateApi(v.example, 'en', 'id');
+      const { data, error } = await sb.from('translation_items').insert([{
+        text_id, text_en: v.example, level: v.level || 'A2', category: v.category || null, is_active: true
+      }]).select();
+      if(error) throw new Error(error.message);
+      if(data && data[0]) allTransItems.unshift(data[0]);
+      done++;
+    }catch(e){
+      console.warn('Gagal generate soal dari kosakata:', v.word, e.message);
+      failed++;
+    }
+    renderTransTable();
+    // jeda kecil biar gak kena rate limit MyMemory
+    await new Promise(r => setTimeout(r, 600));
+  }
+
+  btn.disabled = false;
+  btn.textContent = '🪄 Generate dari Kosakata';
+  msg.textContent = `Selesai. ${done} soal berhasil dibuat${failed > 0 ? `, ${failed} gagal (coba generate ulang buat yang gagal).` : '.'}`;
+  msg.className = failed > 0 ? 'form-msg err' : 'form-msg ok';
+});
 document.getElementById('tSubmitBtn').addEventListener('click', async () => {
   const text_id = document.getElementById('tTextId').value.trim();
   const text_en = document.getElementById('tTextEn').value.trim();
