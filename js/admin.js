@@ -48,7 +48,6 @@ function tryUnlock(){
     loadUserProgress();
     loadVocab();
     loadTransItems();
-    loadAppSettings();
   } else {
     pinError.style.display = 'block';
     pinInput.value = '';
@@ -474,7 +473,7 @@ const SETTINGS_LABELS = {
   kali:   {r1:'Faktor pertama', r2:'Faktor kedua'},
   bagi:   {r1:'Hasil bagi (jawaban)', r2:'Pembagi'}
 };
-const SETTINGS_DEFAULT_ROW = {range1_min:1, range1_max:10, range2_min:1, range2_max:10};
+const SETTINGS_DEFAULT_ROW = {range1_min:1, range1_max:10, range2_min:1, range2_max:10, timer_enabled:true};
 let settingsTargetUser = ''; // '' = Default (berlaku semua orang)
 let knownUsernames = [];
 
@@ -530,6 +529,7 @@ async function loadSettings(){
   wrap.innerHTML = ops.map(op => {
     const row = targetMap[op] || defaultMap[op] || SETTINGS_DEFAULT_ROW;
     const inherited = settingsTargetUser && !targetMap[op];
+    const timerOn = row.timer_enabled !== false;
     const lbl = SETTINGS_LABELS[op];
     return `
       <div class="settings-op-row">
@@ -539,6 +539,16 @@ async function loadSettings(){
           <div><label>${lbl.r1} — max</label><input type="number" id="s_${op}_r1max" value="${row.range1_max}"></div>
           <div><label>${lbl.r2} — min</label><input type="number" id="s_${op}_r2min" value="${row.range2_min}"></div>
           <div><label>${lbl.r2} — max</label><input type="number" id="s_${op}_r2max" value="${row.range2_max}"></div>
+        </div>
+        <div class="switch-row" style="padding:10px 0 0;">
+          <div>
+            <div class="switch-row-label" style="font-size:13px;">Tampilkan Timer</div>
+            <div class="switch-row-desc">Khusus soal ${OP_LABEL[op]}.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="s_${op}_timer" ${timerOn ? 'checked' : ''}>
+            <span class="switch-slider"></span>
+          </label>
         </div>
       </div>
     `;
@@ -562,7 +572,8 @@ document.getElementById('saveSettingsBtn').addEventListener('click', async () =>
     range1_min: Number(document.getElementById(`s_${op}_r1min`).value),
     range1_max: Number(document.getElementById(`s_${op}_r1max`).value),
     range2_min: Number(document.getElementById(`s_${op}_r2min`).value),
-    range2_max: Number(document.getElementById(`s_${op}_r2max`).value)
+    range2_max: Number(document.getElementById(`s_${op}_r2max`).value),
+    timer_enabled: document.getElementById(`s_${op}_timer`).checked
   }));
 
   for(const r of rows){
@@ -740,40 +751,6 @@ async function loadUserProgress(){
   `).join('');
 }
 
-/* ---------------- Pengaturan Tampilan (timer global) ---------------- */
-async function loadAppSettings(){
-  const wrap = document.getElementById('timerToggleWrap');
-  if(!sb){ wrap.innerHTML = `<div class="empty-state">Supabase belum dikonfigurasi.</div>`; return; }
-
-  const { data, error } = await sb.from('app_settings').select('*').eq('id', 1).maybeSingle();
-  if(error){
-    wrap.innerHTML = `<div class="empty-state">Gagal memuat pengaturan: ${escapeHtml(error.message)}</div>`;
-    return;
-  }
-  const timerEnabled = data ? data.timer_enabled !== false : true;
-
-  wrap.innerHTML = `
-    <div class="switch-row">
-      <div>
-        <div class="switch-row-label">Tampilkan Timer Soal</div>
-        <div class="switch-row-desc">Kalau dimatikan, "Waktu soal" & "Waktu total" gak muncul pas ngerjain kuis Matematika.</div>
-      </div>
-      <label class="switch">
-        <input type="checkbox" id="timerToggleInput" ${timerEnabled ? 'checked' : ''}>
-        <span class="switch-slider"></span>
-      </label>
-    </div>
-  `;
-
-  document.getElementById('timerToggleInput').addEventListener('change', async (e) => {
-    const enabled = e.target.checked;
-    const { error: upErr } = await sb.from('app_settings').upsert([{ id: 1, timer_enabled: enabled }], { onConflict: 'id' });
-    if(upErr){
-      alert('Gagal simpan pengaturan: ' + upErr.message);
-      e.target.checked = !enabled;
-    }
-  });
-}
 async function loadVocab(){
   const wrap = document.getElementById('vTableWrap');
   if(!sb){ wrap.innerHTML = `<div class="empty-state">Supabase belum dikonfigurasi di supabase-config.js.</div>`; return; }

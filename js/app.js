@@ -18,18 +18,6 @@ const HISTORY_KEY = 'kebunAngka_history';
 const STAR_DATE_KEY = 'kebunAngka_starDate';
 const USERNAME_KEY = 'kebunAngka_username';
 
-/* ---------------- Pengaturan tampilan (diatur admin, berlaku global) ---------------- */
-let timerDisplayEnabled = true; // default nyala selama belum kebaca dari server
-
-async function fetchAppSettings(){
-  if(!sb) return;
-  try{
-    const { data, error } = await sb.from('app_settings').select('*').eq('id', 1).maybeSingle();
-    if(error){ console.warn('Gagal ambil pengaturan tampilan:', error.message); return; }
-    if(data) timerDisplayEnabled = data.timer_enabled !== false;
-  }catch(e){ console.warn('Gagal ambil pengaturan tampilan:', e); }
-}
-
 let totalStars = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10);
 let username = localStorage.getItem(USERNAME_KEY) || '';
 
@@ -300,10 +288,10 @@ function formatDuration(ms){
 
 /* ---------------- Pengaturan rentang angka (dari dashboard admin) ---------------- */
 const DEFAULT_SETTINGS = {
-  tambah: {r1min:1,  r1max:10, r2min:1,  r2max:10},
-  kurang: {r1min:5,  r1max:20, r2min:1,  r2max:20},
-  kali:   {r1min:2,  r1max:9,  r2min:2,  r2max:9},
-  bagi:   {r1min:2,  r1max:9,  r2min:2,  r2max:9}
+  tambah: {r1min:1,  r1max:10, r2min:1,  r2max:10, timerEnabled:true},
+  kurang: {r1min:5,  r1max:20, r2min:1,  r2max:20, timerEnabled:true},
+  kali:   {r1min:2,  r1max:9,  r2min:2,  r2max:9,  timerEnabled:true},
+  bagi:   {r1min:2,  r1max:9,  r2min:2,  r2max:9,  timerEnabled:true}
 };
 let questionSettings = null;
 
@@ -319,11 +307,11 @@ async function loadQuestionSettings(){
     const merged = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
     // Terapkan default global dulu...
     data.filter(r => r.username === '').forEach(row => {
-      merged[row.operation] = { r1min:row.range1_min, r1max:row.range1_max, r2min:row.range2_min, r2max:row.range2_max };
+      merged[row.operation] = { r1min:row.range1_min, r1max:row.range1_max, r2min:row.range2_min, r2max:row.range2_max, timerEnabled: row.timer_enabled !== false };
     });
     // ...baru override pakai pengaturan khusus orang ini (kalau ada), menang di atas default
     data.filter(r => r.username === username).forEach(row => {
-      merged[row.operation] = { r1min:row.range1_min, r1max:row.range1_max, r2min:row.range2_min, r2max:row.range2_max };
+      merged[row.operation] = { r1min:row.range1_min, r1max:row.range1_max, r2min:row.range2_min, r2max:row.range2_max, timerEnabled: row.timer_enabled !== false };
     });
     questionSettings = merged;
   }catch(e){
@@ -555,12 +543,12 @@ function quizScreen(){
         <button class="back" id="backBtn">← Kembali</button>
         <span class="qnum">Soal ${state.idx+1} / 10</span>
       </div>
-      ${timerDisplayEnabled ? `
+      ${(questionSettings && questionSettings[q.op] && questionSettings[q.op].timerEnabled === false) ? '' : `
       <div class="timer-row">
         <span class="timer-chip">Waktu soal: <b id="qTimer">${formatDuration(qDisplayMs)}</b></span>
         <span class="timer-chip">Waktu total: <b id="roundTimer">${formatDuration(roundDisplayMs)}</b></span>
       </div>
-      ` : ''}
+      `}
       <div class="question-text">${questionText(q)}</div>
       ${visual ? `<div class="visual-box">${visual}</div>` : ''}
       <div class="answer-row">
@@ -1050,7 +1038,6 @@ function attachHandlers(){
 }
 
 async function initApp(){
-  await fetchAppSettings();
   if(username && sb){
     // Kalau localStorage kosong (cache/HP baru di-reset) tapi nama udah ada,
     // coba restore progress dari server dulu sebelum nentuin reset harian.
