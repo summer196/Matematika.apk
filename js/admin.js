@@ -467,7 +467,7 @@ async function saveNote(id){
 
 document.getElementById('refreshReviewBtn').addEventListener('click', loadSubmissions);
 
-/* ---------------- Pengaturan rentang angka soal otomatis ---------------- */
+/* ---------------- Pengaturan rentang angka soal otomatis (per orang) ---------------- */
 const SETTINGS_LABELS = {
   tambah: {r1:'Angka pertama', r2:'Angka kedua'},
   kurang: {r1:'Angka awal (yang dikurangi)', r2:'Angka pengurang (maks.)'},
@@ -475,21 +475,65 @@ const SETTINGS_LABELS = {
   bagi:   {r1:'Hasil bagi (jawaban)', r2:'Pembagi'}
 };
 const SETTINGS_DEFAULT_ROW = {range1_min:1, range1_max:10, range2_min:1, range2_max:10};
+let settingsTargetUser = ''; // '' = Default (berlaku semua orang)
+let knownUsernames = [];
+
+async function populateSettingsUserSelect(){
+  const sel = document.getElementById('settingsUserSelect');
+  if(!sb){ return; }
+  const { data, error } = await sb.from('user_progress').select('username').order('username');
+  if(!error && data){
+    knownUsernames = [...new Set(data.map(r => r.username).filter(Boolean))];
+  }
+  const options = [`<option value="">Default (berlaku buat semua orang)</option>`]
+    .concat(knownUsernames.map(u => `<option value="${escapeHtml(u)}" ${u===settingsTargetUser?'selected':''}>${escapeHtml(u)}</option>`));
+  sel.innerHTML = options.join('');
+  sel.value = settingsTargetUser;
+}
+
+document.getElementById('settingsUserSelect').addEventListener('change', (e) => {
+  settingsTargetUser = e.target.value;
+  loadSettings();
+});
+
+document.getElementById('settingsNewUserBtn').addEventListener('click', () => {
+  const val = document.getElementById('settingsNewUserInput').value.trim();
+  if(!val) return;
+  if(!knownUsernames.includes(val)) knownUsernames.push(val);
+  settingsTargetUser = val;
+  document.getElementById('settingsNewUserInput').value = '';
+  populateSettingsUserSelect();
+  loadSettings();
+});
 
 async function loadSettings(){
   const wrap = document.getElementById('settingsWrap');
+  const resetBtn = document.getElementById('resetUserSettingsBtn');
   if(!sb){ wrap.innerHTML = `<div class="empty-state">Supabase belum dikonfigurasi.</div>`; return; }
-  const { data, error } = await sb.from('question_settings').select('*');
+
+  await populateSettingsUserSelect();
+  resetBtn.style.display = settingsTargetUser ? 'block' : 'none';
+
+  // Ambil baris default DAN baris khusus target, biar tau mana yang beneran ke-override
+  const targets = settingsTargetUser ? ['', settingsTargetUser] : [''];
+  const { data, error } = await sb.from('question_settings').select('*').in('username', targets);
   if(error){ wrap.innerHTML = `<div class="empty-state">Gagal memuat pengaturan: ${escapeHtml(error.message)}</div>`; return; }
-  const map = {};
-  (data || []).forEach(r => map[r.operation] = r);
+
+  const defaultMap = {};
+  const targetMap = {};
+  (data || []).forEach(r => {
+    if(r.username === '') defaultMap[r.operation] = r;
+    else targetMap[r.operation] = r;
+  });
+
   const ops = ['tambah','kurang','kali','bagi'];
   wrap.innerHTML = ops.map(op => {
-    const row = map[op] || SETTINGS_DEFAULT_ROW;
+    const row = targetMap[op] || defaultMap[op] || SETTINGS_DEFAULT_ROW;
+    const inherited = settingsTargetUser && !targetMap[op];
     const lbl = SETTINGS_LABELS[op];
     return `
       <div class="settings-op-row">
-        <div class="settings-op-title">${OP_LABEL[op]}</div>
+        <div class="settings-op-title">${OP_LABEL[op]}${inherited ? ' <span style="font-weight:500; font-size:11px; color:var(--ink-soft);">(ikut Default)</span>' : ''}</div>
         <div class="settings-range-grid">
           <div><label>${lbl.r1} — min</label><input type="number" id="s_${op}_r1min" value="${row.range1_min}"></div>
           <div><label>${lbl.r1} — max</label><input type="number" id="s_${op}_r1max" value="${row.range1_max}"></div>
@@ -501,10 +545,19 @@ async function loadSettings(){
   }).join('');
 }
 
+document.getElementById('resetUserSettingsBtn').addEventListener('click', async () => {
+  if(!settingsTargetUser) return;
+  if(!confirm(`Hapus pengaturan khusus buat "${settingsTargetUser}"? Dia bakal balik pakai Default.`)) return;
+  const { error } = await sb.from('question_settings').delete().eq('username', settingsTargetUser);
+  if(error){ alert('Gagal hapus: ' + error.message); return; }
+  loadSettings();
+});
+
 document.getElementById('saveSettingsBtn').addEventListener('click', async () => {
   const ops = ['tambah','kurang','kali','bagi'];
   const msg = document.getElementById('settingsMsg');
   const rows = ops.map(op => ({
+    username: settingsTargetUser,
     operation: op,
     range1_min: Number(document.getElementById(`s_${op}_r1min`).value),
     range1_max: Number(document.getElementById(`s_${op}_r1max`).value),
@@ -529,7 +582,7 @@ document.getElementById('saveSettingsBtn').addEventListener('click', async () =>
   const btn = document.getElementById('saveSettingsBtn');
   btn.disabled = true;
   btn.textContent = 'Menyimpan...';
-  const { error } = await sb.from('question_settings').upsert(rows, { onConflict: 'operation' });
+  const { error } = await sb.from('question_settings').upsert(rows, { onConflict: 'username,operation' });
   btn.disabled = false;
   btn.textContent = 'Simpan Pengaturan';
 

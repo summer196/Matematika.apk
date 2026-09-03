@@ -254,9 +254,21 @@
   <div class="tab-panel" data-tab-panel="pengaturan">
     <div class="panel">
       <h2>Rentang Angka Soal Otomatis</h2>
-      <div class="sub-note">Atur rentang angka untuk soal yang dibuat otomatis (bukan soal khusus). Tidak perlu mengubah kode.</div>
+      <div class="sub-note">Atur rentang angka untuk soal yang dibuat otomatis (bukan soal khusus). Pilih dulu buat siapa pengaturannya — kalau orangnya belum punya pengaturan sendiri, dia otomatis pakai baris "Default".</div>
+      <div class="field" style="max-width:320px; margin-bottom:14px;">
+        <label>Pengaturan untuk</label>
+        <select id="settingsUserSelect"></select>
+      </div>
+      <div class="field" style="max-width:320px; margin-bottom:14px;" id="settingsNewUserRow">
+        <label>Atau buat pengaturan khusus buat nama baru</label>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="settingsNewUserInput" placeholder="Ketik nama persis seperti dia login">
+          <button type="button" class="reset-btn" id="settingsNewUserBtn" style="background:#EAF0FF; color:var(--berry-dark); white-space:nowrap;">Tambah</button>
+        </div>
+      </div>
       <div id="settingsWrap"><div class="loading-line">Memuat pengaturan...</div></div>
       <button class="submit-btn" id="saveSettingsBtn" style="margin-top:14px;">Simpan Pengaturan</button>
+      <button class="reset-btn" id="resetUserSettingsBtn" style="margin-top:10px; display:none;">Hapus Pengaturan Khusus Ini (balik ke Default)</button>
       <div class="form-msg" id="settingsMsg"></div>
     </div>
 

@@ -311,10 +311,18 @@ async function loadQuestionSettings(){
   if(questionSettings) return questionSettings;
   if(!sb){ questionSettings = DEFAULT_SETTINGS; return questionSettings; }
   try{
-    const { data, error } = await sb.from('question_settings').select('*');
+    // Ambil baris default (username='') DAN baris khusus untuk orang ini (kalau ada)
+    const targets = username ? ['', username] : [''];
+    const { data, error } = await sb.from('question_settings').select('*').in('username', targets);
     if(error || !data || data.length === 0){ questionSettings = DEFAULT_SETTINGS; return questionSettings; }
+
     const merged = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
-    data.forEach(row => {
+    // Terapkan default global dulu...
+    data.filter(r => r.username === '').forEach(row => {
+      merged[row.operation] = { r1min:row.range1_min, r1max:row.range1_max, r2min:row.range2_min, r2max:row.range2_max };
+    });
+    // ...baru override pakai pengaturan khusus orang ini (kalau ada), menang di atas default
+    data.filter(r => r.username === username).forEach(row => {
       merged[row.operation] = { r1min:row.range1_min, r1max:row.range1_max, r2min:row.range2_min, r2max:row.range2_max };
     });
     questionSettings = merged;
@@ -865,6 +873,7 @@ function attachHandlers(){
         if(!val){ input.classList.add('wrong-shake'); setTimeout(()=>input.classList.remove('wrong-shake'),350); return; }
         username = val;
         localStorage.setItem(USERNAME_KEY, username);
+        questionSettings = null; // reset cache biar narik pengaturan khusus nama yang baru
         btn.disabled = true;
         btn.textContent = 'Memuat data...';
         if(sb){
