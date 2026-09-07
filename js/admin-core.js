@@ -54,6 +54,7 @@ function tryUnlock(){
     loadUserProgress();
     loadVocab();
     loadTransItems();
+    setupAdminRealtime();
   } else {
     pinError.style.display = 'block';
     pinInput.value = '';

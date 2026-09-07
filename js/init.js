@@ -16,6 +16,8 @@ async function initApp(){
   } else if(username){
     performDailyResetCheck();
   }
+  setupRealtimeSubscriptions();
+  window.addEventListener('pagehide', () => { if(state.screen === 'quiz') broadcastQuizCleared(); });
   render();
 }
 initApp();

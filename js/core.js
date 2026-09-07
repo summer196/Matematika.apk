@@ -260,6 +260,6 @@ function generateQuestion(op, settings){
   } else {
     const q=rand(s.r1min,s.r1max); b=rand(s.r2min,s.r2max); a=b*q; answer=q;
   }
-  return { op, a, b, answer, isCustom:false };
+  return { op, a, b, answer, isCustom:false, timerEnabled: s.timerEnabled !== false };
 }
 

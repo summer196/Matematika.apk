@@ -26,7 +26,9 @@ async function fetchCustomQuestions(chosenOp){
 
 async function generateRound(chosenOp){
   const settings = await loadQuestionSettings();
-  const custom = shuffle(await fetchCustomQuestions(chosenOp));
+  const custom = shuffle(await fetchCustomQuestions(chosenOp)).map(q => ({
+    ...q, timerEnabled: (settings[q.op] ? settings[q.op].timerEnabled : true) !== false
+  }));
   if(custom.length >= 10) return custom.slice(0,10);
   let round = custom.slice();
   while(round.length < 10) round.push(generateQuestion(chosenOp, settings));
@@ -126,7 +128,7 @@ function quizScreen(){
         <button class="back" id="backBtn">← Kembali</button>
         <span class="qnum">Soal ${state.idx+1} / 10</span>
       </div>
-      ${(questionSettings && questionSettings[q.op] && questionSettings[q.op].timerEnabled === false) ? '' : `
+      ${q.timerEnabled === false ? '' : `
       <div class="timer-row">
         <span class="timer-chip">Waktu soal: <b id="qTimer">${formatDuration(qDisplayMs)}</b></span>
         <span class="timer-chip">Waktu total: <b id="roundTimer">${formatDuration(roundDisplayMs)}</b></span>
@@ -308,12 +310,13 @@ function attachQuizHandlers(){
     const input = document.getElementById('answerInput');
     input.focus();
     startLiveTimer();
+    broadcastQuizActivity();
     const actionBtn = document.getElementById('actionBtn');
-    document.getElementById('backBtn').addEventListener('click', () => { state.screen='home'; render(); });
+    document.getElementById('backBtn').addEventListener('click', () => { broadcastQuizCleared(); state.screen='home'; render(); });
 
     input.addEventListener('keydown', (e) => { if(e.key === 'Enter') actionBtn.click(); });
 
-    actionBtn.addEventListener('click', () => {
+    actionBtn.addEventListener('click', async () => {
       if(!state.answered){
         const val = input.value.trim();
         if(val === ''){ input.classList.add('wrong-shake'); setTimeout(()=>input.classList.remove('wrong-shake'),350); return; }
@@ -360,9 +363,22 @@ function attachQuizHandlers(){
             sb.from('submissions').update({ round_total_ms: roundTimeMs }).eq('session_id', state.sessionId)
               .then(()=>{}, (err) => console.warn('Gagal simpan total waktu:', err));
           }
+          broadcastQuizCleared();
           state.screen = 'result';
         } else {
-          state.idx++;
+          const nextIdx = state.idx + 1;
+          const nextQ = state.questions[nextIdx];
+          // Soal berikutnya di-refresh pakai pengaturan TERBARU (rentang & timer),
+          // tanpa nyentuh soal yang udah lewat/lagi dijawab.
+          if(nextQ){
+            const settings = await loadQuestionSettings();
+            if(nextQ.isCustom){
+              nextQ.timerEnabled = (settings[nextQ.op] ? settings[nextQ.op].timerEnabled : true) !== false;
+            } else {
+              state.questions[nextIdx] = generateQuestion(nextQ.op, settings);
+            }
+          }
+          state.idx = nextIdx;
           state.answered = false;
           state.questionStartTime = Date.now();
         }

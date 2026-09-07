@@ -127,6 +127,7 @@ function attachHandlers(){
 
   document.querySelectorAll('[data-nav]').forEach(btn => {
     btn.addEventListener('click', () => {
+      if(state.screen === 'quiz') broadcastQuizCleared();
       state.screen = btn.dataset.nav;
       state.sidebarOpen = false;
       render();

@@ -31,6 +31,7 @@
 
   <div class="admin-tabs" id="adminTabs">
     <button class="admin-tab active" data-tab="ringkasan">Dashboard</button>
+    <button class="admin-tab" data-tab="live">🔴 Sedang Aktif</button>
     <button class="admin-tab" data-tab="soal">Kelola Soal</button>
     <button class="admin-tab" data-tab="kosakata">Kosakata Inggris</button>
     <button class="admin-tab" data-tab="terjemahan">Latihan Terjemahan</button>
@@ -55,6 +56,15 @@
         Gunakan tab di atas untuk berpindah menu: <b>Kelola Soal</b> untuk menambah dan mengedit soal khusus,
         <b>Koreksi Jawaban</b> untuk melihat dan menilai jawaban bidadari, dan <b>Pengaturan</b> untuk mengatur rentang angka soal otomatis.
       </div>
+    </div>
+  </div>
+
+  <!-- ================= TAB: Sedang Aktif (live monitoring) ================= -->
+  <div class="tab-panel" data-tab-panel="live">
+    <div class="panel">
+      <h2>Sedang Mengerjakan Kuis</h2>
+      <div class="sub-note">Update langsung tiap kali pengguna pindah soal — gak perlu nunggu dia submit jawaban.</div>
+      <div id="liveActivityWrap"><div class="empty-state">Belum ada yang lagi ngerjain kuis.</div></div>
     </div>
   </div>
 
@@ -394,5 +404,7 @@
 <script src="js/admin-bintang.js"></script>
 <script src="js/admin-kosakata.js"></script>
 <script src="js/admin-terjemahan.js"></script>
+<script src="js/admin-live.js"></script>
+<script src="js/admin-realtime.js"></script>
 </body>
 </html>
