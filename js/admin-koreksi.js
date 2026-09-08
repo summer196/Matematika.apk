@@ -5,6 +5,7 @@
 
 /* ---------------- Koreksi Jawaban (review submissions) ---------------- */
 const OP_LABEL_REVIEW = {tambah:'Tambah', kurang:'Kurang', kali:'Kali', bagi:'Bagi', campur:'Campuran'};
+let reviewFilterUser = 'semua';
 
 function formatDateAdmin(iso){
   const d = new Date(iso);
@@ -28,8 +29,20 @@ async function loadSubmissions(){
     return;
   }
   allSubmissions = data || [];
+  populateReviewUserFilter();
   renderReview();
   updateDashboardStats();
+}
+
+function populateReviewUserFilter(){
+  const sel = document.getElementById('reviewUserFilter');
+  if(!sel) return;
+  const names = [...new Set(allSubmissions.map(s => s.username).filter(Boolean))].sort();
+  const options = [`<option value="semua">Semua Nama</option>`]
+    .concat(names.map(n => `<option value="${escapeHtml(n)}" ${n===reviewFilterUser?'selected':''}>${escapeHtml(n)}</option>`));
+  sel.innerHTML = options.join('');
+  sel.value = names.includes(reviewFilterUser) ? reviewFilterUser : 'semua';
+  reviewFilterUser = sel.value;
 }
 
 function updateDashboardStats(){
@@ -63,11 +76,19 @@ function effectiveStatus(item){
 
 function renderReview(){
   const wrap = document.getElementById('reviewWrap');
+  const filtered = reviewFilterUser === 'semua'
+    ? allSubmissions
+    : allSubmissions.filter(s => s.username === reviewFilterUser);
+
   if(allSubmissions.length === 0){
     wrap.innerHTML = `<div class="empty-state">Belum ada jawaban yang masuk. Data akan otomatis muncul di sini setelah bidadari mulai berlatih.</div>`;
     return;
   }
-  const sessions = groupBySession(allSubmissions);
+  if(filtered.length === 0){
+    wrap.innerHTML = `<div class="empty-state">Belum ada jawaban dari "${escapeHtml(reviewFilterUser)}".</div>`;
+    return;
+  }
+  const sessions = groupBySession(filtered);
   wrap.innerHTML = sessions.map(sess => {
     const benarCount = sess.items.filter(i => effectiveStatus(i) === 'benar').length;
     const isOpen = !!openSessions[sess.session_id];
@@ -172,6 +193,10 @@ async function saveNote(id){
 }
 
 document.getElementById('refreshReviewBtn').addEventListener('click', loadSubmissions);
+document.getElementById('reviewUserFilter').addEventListener('change', (e) => {
+  reviewFilterUser = e.target.value;
+  renderReview();
+});
 
 
 /* ---------------- Timer helper buat panel Koreksi Jawaban ---------------- */
