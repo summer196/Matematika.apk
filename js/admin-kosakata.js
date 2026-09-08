@@ -211,3 +211,5 @@ document.getElementById('evSaveBtn').addEventListener('click', async () => {
   closeEditVocabModal();
 });
 
+
+onAdminUnlock(loadVocab);

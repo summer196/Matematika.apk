@@ -232,3 +232,5 @@ document.getElementById('editSaveBtn').addEventListener('click', async () => {
   closeEditModal();
 });
 
+
+onAdminUnlock(loadQuestions);

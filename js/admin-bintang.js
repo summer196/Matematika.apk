@@ -140,3 +140,8 @@ async function loadUserProgress(){
   `).join('');
 }
 
+document.getElementById('refreshUsersBtn').addEventListener('click', loadUserProgress);
+
+onAdminUnlock(loadStarLog);
+onAdminUnlock(loadStarRecord);
+onAdminUnlock(loadUserProgress);

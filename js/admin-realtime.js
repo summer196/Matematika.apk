@@ -33,3 +33,5 @@ function setupAdminRealtime(){
     })
     .subscribe();
 }
+
+onAdminUnlock(setupAdminRealtime);

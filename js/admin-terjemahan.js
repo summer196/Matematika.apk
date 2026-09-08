@@ -291,4 +291,4 @@ document.getElementById('etSaveBtn').addEventListener('click', async () => {
   closeEditTransModal();
 });
 
-document.getElementById('refreshUsersBtn').addEventListener('click', loadUserProgress);
+onAdminUnlock(loadTransItems);

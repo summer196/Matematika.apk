@@ -25,7 +25,7 @@ function setupLiveMonitoring(){
       delete liveActivityMap[p.username];
       renderLiveActivity();
     })
-    .subscribe();
+    .subscribe((status) => console.log('[live-activity/admin] status:', status));
 
   // Cek berkala buat nge-gray-out/buang kartu yang udah lama gak update
   // (misal orangnya nutup tab tanpa sempat ke-broadcast "cleared")

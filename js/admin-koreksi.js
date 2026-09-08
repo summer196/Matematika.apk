@@ -183,3 +183,5 @@ function formatDurationAdmin(ms){
   return m > 0 ? `${m}:${String(s).padStart(2,'0')}` : `${s}d`;
 }
 
+
+onAdminUnlock(loadSubmissions);

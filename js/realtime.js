@@ -15,7 +15,13 @@ function setupRealtimeSubscriptions(){
   if(!sb) return;
 
   liveChannel = sb.channel('live-activity', { config: { broadcast: { self:false } } });
-  liveChannel.subscribe();
+  liveChannel.subscribe((status) => {
+    console.log('[live-activity] status:', status);
+    if(status === 'SUBSCRIBED'){
+      liveChannelReady = true;
+      if(pendingLiveBroadcast){ liveChannel.send(pendingLiveBroadcast); pendingLiveBroadcast = null; }
+    }
+  });
 
   sb.channel('app-updates')
     // Rentang angka & timer diubah admin → reset cache, kepake mulai ronde berikutnya
@@ -62,12 +68,22 @@ function setupRealtimeSubscriptions(){
 
 /* ---------------- Broadcast "lagi ngerjain soal apa" ke admin ---------------- */
 let liveChannel = null;
+let liveChannelReady = false;
+let pendingLiveBroadcast = null; // simpan broadcast terakhir kalau channel belum siap, dikirim begitu siap
+
+function sendLive(msg){
+  if(!liveChannel) return;
+  if(liveChannelReady){
+    liveChannel.send(msg);
+  } else {
+    pendingLiveBroadcast = msg; // channel masih handshake, kirim yang paling baru begitu SUBSCRIBED
+  }
+}
 
 function broadcastQuizActivity(){
-  if(!liveChannel) return;
   const q = state.questions && state.questions[state.idx];
   if(!q) return;
-  liveChannel.send({
+  sendLive({
     type: 'broadcast',
     event: 'activity',
     payload: {
@@ -82,6 +98,6 @@ function broadcastQuizActivity(){
 }
 
 function broadcastQuizCleared(){
-  if(!liveChannel || !username) return;
-  liveChannel.send({ type:'broadcast', event:'cleared', payload:{ username } });
+  if(!username) return;
+  sendLive({ type:'broadcast', event:'cleared', payload:{ username } });
 }

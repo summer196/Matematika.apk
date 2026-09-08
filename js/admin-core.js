@@ -4,11 +4,6 @@
    file admin-*.js lainnya.
    ============================================================ */
 
-/* ============================================================
-   ADMIN.JS — logic dashboard admin (admin.html)
-   Butuh supabase-js CDN + supabase-config.js dimuat sebelum ini.
-   ============================================================ */
-
 let sb = null;
 try{
   if(typeof SUPABASE_URL !== 'undefined' && SUPABASE_URL.indexOf('GANTI-DENGAN') === -1){
@@ -37,6 +32,16 @@ function escapeHtml(str){
   return d.innerHTML;
 }
 
+/* ---------------- Hook "jalanin pas PIN benar" ----------------
+   Tiap file admin-*.js daftarin fungsi loadnya sendiri lewat
+   onAdminUnlock(fn) di bagian bawah filenya masing-masing, biar
+   admin-core.js ini gak perlu tau menu/tab apa aja yang ada —
+   jadi bisa dipakai bareng-bareng sama dashboard mana pun
+   (admin.html buat Matematika, admin-english.html buat Bahasa
+   Inggris) tinggal beda kombinasi file admin-*.js yang dimuat. */
+let unlockHooks = [];
+function onAdminUnlock(fn){ unlockHooks.push(fn); }
+
 /* ---------------- PIN gate ---------------- */
 const pinInput = document.getElementById('pinInput');
 const pinError = document.getElementById('pinError');
@@ -46,15 +51,7 @@ function tryUnlock(){
   if(typeof ADMIN_PIN !== 'undefined' && val === String(ADMIN_PIN)){
     document.getElementById('pinGate').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
-    loadQuestions();
-    loadSubmissions();
-    loadSettings();
-    loadStarLog();
-    loadStarRecord();
-    loadUserProgress();
-    loadVocab();
-    loadTransItems();
-    setupAdminRealtime();
+    unlockHooks.forEach(fn => fn());
   } else {
     pinError.style.display = 'block';
     pinInput.value = '';

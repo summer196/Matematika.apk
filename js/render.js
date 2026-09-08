@@ -49,7 +49,8 @@ function sidebarHtml(){
           <li>${navItem('terjemahan','Latihan Terjemahan')}</li>
           <li>${navItem('riwayat','Riwayat Soal')}</li>
           <li>${navItem('topscore','Topscore')}</li>
-          <li><a class="nav-item" href="admin.html"><span>Menu Admin</span></a></li>
+          <li><a class="nav-item" href="admin.html"><span>Menu Admin Matematika</span></a></li>
+          <li><a class="nav-item" href="admin-english.html"><span>Menu Admin Bahasa Inggris</span></a></li>
         </ul>
         <div class="sidebar-footer">
           <img class="sidebar-mini-avatar" src="assets/senyum-kenangan.jpg" alt="Ichan dan Michell">

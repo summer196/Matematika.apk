@@ -144,3 +144,5 @@ document.getElementById('saveSettingsBtn').addEventListener('click', async () =>
   msg.className = 'form-msg ok';
 });
 
+
+onAdminUnlock(loadSettings);
