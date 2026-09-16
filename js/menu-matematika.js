@@ -298,6 +298,10 @@ function attachHomeHandlers(){
       state.slotResults = new Array(10).fill(null);
       state.sessionId = genSessionId();
       render();
+      // Paksa narik pengaturan paling baru tiap mulai ronde baru — gak cuma
+      // ngandelin cache/Realtime, jadi tetep bener walau Realtime lagi bermasalah.
+      questionSettings = null;
+      starSettings = null;
       state.questions = await generateRound(state.chosenOp);
       state.loading = false;
       state.roundAccumulatedMs = 0;
@@ -371,9 +375,13 @@ function attachQuizHandlers(){
         } else {
           const nextIdx = state.idx + 1;
           const nextQ = state.questions[nextIdx];
-          // Soal berikutnya di-refresh pakai pengaturan TERBARU (rentang & timer),
-          // tanpa nyentuh soal yang udah lewat/lagi dijawab.
+          // Soal berikutnya di-refresh pakai pengaturan TERBARU (rentang, timer, bintang),
+          // tanpa nyentuh soal yang udah lewat/lagi dijawab. Cache di-reset paksa di sini
+          // (bukan cuma ngandelin Realtime) biar tetep bener walau koneksi Realtime lagi
+          // bermasalah — konsekuensinya cuma 1-2 query kecil ekstra tiap pindah soal.
           if(nextQ){
+            questionSettings = null;
+            starSettings = null;
             const settings = await loadQuestionSettings();
             await loadStarSettings();
             if(nextQ.isCustom){
