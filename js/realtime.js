@@ -28,6 +28,10 @@ function setupRealtimeSubscriptions(){
     .on('postgres_changes', { event:'*', schema:'public', table:'question_settings' }, () => {
       questionSettings = null;
     })
+    // Jumlah bintang diubah admin → reset cache, kepake mulai soal berikutnya
+    .on('postgres_changes', { event:'*', schema:'public', table:'user_settings' }, () => {
+      starSettings = null;
+    })
     // Soal khusus ditambah/diubah admin → otomatis kepake ronde berikutnya (gak ada cache buat ini)
     .on('postgres_changes', { event:'*', schema:'public', table:'custom_questions' }, () => {
       // sengaja kosong: fetchCustomQuestions() selalu fetch fresh tiap generateRound()

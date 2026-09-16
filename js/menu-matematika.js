@@ -26,6 +26,7 @@ async function fetchCustomQuestions(chosenOp){
 
 async function generateRound(chosenOp){
   const settings = await loadQuestionSettings();
+  await loadStarSettings();
   const custom = shuffle(await fetchCustomQuestions(chosenOp)).map(q => ({
     ...q, timerEnabled: (settings[q.op] ? settings[q.op].timerEnabled : true) !== false
   }));
@@ -330,16 +331,18 @@ function attachQuizHandlers(){
         state.slotResults[state.idx] = correct;
         if(correct){
           state.correctCount++;
-          totalStars++;
+          const gain = (starSettings && starSettings.starCorrect != null) ? starSettings.starCorrect : 1;
+          totalStars += gain;
           localStorage.setItem(STORAGE_KEY, totalStars);
           pushProgressToServer();
           state.feedbackMsg = pick(ENCOURAGE_RIGHT);
           input.classList.add('right-glow');
         } else {
-          totalStars = Math.max(0, totalStars - 3);
+          const loss = (starSettings && starSettings.starWrong != null) ? starSettings.starWrong : 3;
+          totalStars = Math.max(0, totalStars - loss);
           localStorage.setItem(STORAGE_KEY, totalStars);
           pushProgressToServer();
-          state.feedbackMsg = `${pick(ENCOURAGE_WRONG)} Jawaban yang benar: ${q.answer} (−3 bintang)`;
+          state.feedbackMsg = `${pick(ENCOURAGE_WRONG)} Jawaban yang benar: ${q.answer} (−${loss} bintang)`;
           input.classList.add('wrong-shake');
         }
         if(sb){
@@ -372,6 +375,7 @@ function attachQuizHandlers(){
           // tanpa nyentuh soal yang udah lewat/lagi dijawab.
           if(nextQ){
             const settings = await loadQuestionSettings();
+            await loadStarSettings();
             if(nextQ.isCustom){
               nextQ.timerEnabled = (settings[nextQ.op] ? settings[nextQ.op].timerEnabled : true) !== false;
             } else {

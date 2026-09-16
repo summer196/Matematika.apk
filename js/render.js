@@ -16,8 +16,15 @@ function render(){
 
 function startLiveTimer(){
   stopLiveTimer();
+  state.heartbeatTick = 0;
   state.timerInterval = setInterval(() => {
-    if(state.answered) return; // jeda total, gak update apa-apa selama nunggu klik lanjut
+    // "Detak jantung" — kirim ulang status "masih aktif" tiap 10 detik biar gak
+    // dianggap berhenti sama admin, baik lagi mikir jawaban maupun lagi baca
+    // feedback sebelum klik "Soal Berikutnya"
+    state.heartbeatTick++;
+    if(state.heartbeatTick % 10 === 0) broadcastQuizActivity();
+
+    if(state.answered) return; // jeda total, gak update tampilan timer selama nunggu klik lanjut
     const qEl = document.getElementById('qTimer');
     const rEl = document.getElementById('roundTimer');
     const currentSegment = Date.now() - (state.questionStartTime || Date.now());
@@ -99,6 +106,7 @@ function attachWelcomeHandlers(){
       username = val;
       localStorage.setItem(USERNAME_KEY, username);
       questionSettings = null; // reset cache biar narik pengaturan khusus nama yang baru
+      starSettings = null;
       btn.disabled = true;
       btn.textContent = 'Memuat data...';
       if(sb){

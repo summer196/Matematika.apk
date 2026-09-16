@@ -243,6 +243,31 @@ async function loadQuestionSettings(){
   return questionSettings;
 }
 
+/* ---------------- Pengaturan jumlah bintang (dari dashboard admin) ---------------- */
+const DEFAULT_STAR_SETTINGS = { starCorrect:1, starWrong:3 };
+let starSettings = null;
+
+async function loadStarSettings(){
+  if(starSettings) return starSettings;
+  if(!sb){ starSettings = DEFAULT_STAR_SETTINGS; return starSettings; }
+  try{
+    const targets = username ? ['', username] : [''];
+    const { data, error } = await sb.from('user_settings').select('*').in('username', targets);
+    if(error || !data || data.length === 0){ starSettings = DEFAULT_STAR_SETTINGS; return starSettings; }
+
+    let merged = { ...DEFAULT_STAR_SETTINGS };
+    const defaultRow = data.find(r => r.username === '');
+    if(defaultRow) merged = { starCorrect: defaultRow.star_correct, starWrong: defaultRow.star_wrong };
+    const userRow = data.find(r => r.username === username);
+    if(userRow) merged = { starCorrect: userRow.star_correct, starWrong: userRow.star_wrong };
+    starSettings = merged;
+  }catch(e){
+    console.warn('Gagal ambil pengaturan bintang, pakai default.', e);
+    starSettings = DEFAULT_STAR_SETTINGS;
+  }
+  return starSettings;
+}
+
 /* ---------------- Question generation (procedural) ---------------- */
 function generateQuestion(op, settings){
   if(op === 'campur') op = pick(['tambah','kurang','kali','bagi']);

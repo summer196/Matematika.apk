@@ -12,6 +12,7 @@ const SETTINGS_LABELS = {
   bagi:   {r1:'Hasil bagi (jawaban)', r2:'Pembagi'}
 };
 const SETTINGS_DEFAULT_ROW = {range1_min:1, range1_max:10, range2_min:1, range2_max:10, timer_enabled:true};
+const STAR_DEFAULT_ROW = {star_correct:1, star_wrong:3};
 let settingsTargetUser = ''; // '' = Default (berlaku semua orang)
 let knownUsernames = [];
 
@@ -45,6 +46,7 @@ document.getElementById('settingsNewUserBtn').addEventListener('click', () => {
 
 async function loadSettings(){
   const wrap = document.getElementById('settingsWrap');
+  const starWrap = document.getElementById('starSettingsWrap');
   const resetBtn = document.getElementById('resetUserSettingsBtn');
   if(!sb){ wrap.innerHTML = `<div class="empty-state">Supabase belum dikonfigurasi.</div>`; return; }
 
@@ -56,12 +58,30 @@ async function loadSettings(){
   const { data, error } = await sb.from('question_settings').select('*').in('username', targets);
   if(error){ wrap.innerHTML = `<div class="empty-state">Gagal memuat pengaturan: ${escapeHtml(error.message)}</div>`; return; }
 
+  const { data: starData, error: starError } = await sb.from('user_settings').select('*').in('username', targets);
+  if(starError){ starWrap.innerHTML = `<div class="empty-state">Gagal memuat pengaturan bintang: ${escapeHtml(starError.message)}</div>`; return; }
+
   const defaultMap = {};
   const targetMap = {};
   (data || []).forEach(r => {
     if(r.username === '') defaultMap[r.operation] = r;
     else targetMap[r.operation] = r;
   });
+
+  const starDefaultRow = (starData || []).find(r => r.username === '') || STAR_DEFAULT_ROW;
+  const starTargetRow = (starData || []).find(r => r.username === settingsTargetUser);
+  const starRow = starTargetRow || starDefaultRow;
+  const starInherited = settingsTargetUser && !starTargetRow;
+
+  starWrap.innerHTML = `
+    <div class="settings-op-row">
+      <div class="settings-op-title">${starInherited ? '<span style="font-weight:500; font-size:11px; color:var(--ink-soft);">(ikut Default)</span>' : ''}</div>
+      <div class="settings-range-grid">
+        <div><label>Bintang kalau jawaban BENAR</label><input type="number" id="star_correct" value="${starRow.star_correct}" min="0"></div>
+        <div><label>Bintang HILANG kalau jawaban SALAH</label><input type="number" id="star_wrong" value="${starRow.star_wrong}" min="0"></div>
+      </div>
+    </div>
+  `;
 
   const ops = ['tambah','kurang','kali','bagi'];
   wrap.innerHTML = ops.map(op => {
@@ -95,9 +115,11 @@ async function loadSettings(){
 
 document.getElementById('resetUserSettingsBtn').addEventListener('click', async () => {
   if(!settingsTargetUser) return;
-  if(!confirm(`Hapus pengaturan khusus buat "${settingsTargetUser}"? Dia bakal balik pakai Default.`)) return;
+  if(!confirm(`Hapus pengaturan khusus (rentang, timer, & bintang) buat "${settingsTargetUser}"? Dia bakal balik pakai Default.`)) return;
   const { error } = await sb.from('question_settings').delete().eq('username', settingsTargetUser);
   if(error){ alert('Gagal hapus: ' + error.message); return; }
+  const { error: starErr } = await sb.from('user_settings').delete().eq('username', settingsTargetUser);
+  if(starErr){ alert('Gagal hapus pengaturan bintang: ' + starErr.message); return; }
   loadSettings();
 });
 
@@ -114,6 +136,9 @@ document.getElementById('saveSettingsBtn').addEventListener('click', async () =>
     timer_enabled: document.getElementById(`s_${op}_timer`).checked
   }));
 
+  const starCorrect = Number(document.getElementById('star_correct').value);
+  const starWrong = Number(document.getElementById('star_wrong').value);
+
   for(const r of rows){
     const vals = [r.range1_min, r.range1_max, r.range2_min, r.range2_max];
     if(vals.some(v => isNaN(v))){
@@ -127,11 +152,29 @@ document.getElementById('saveSettingsBtn').addEventListener('click', async () =>
       return;
     }
   }
+  if(isNaN(starCorrect) || isNaN(starWrong) || starCorrect < 0 || starWrong < 0){
+    msg.textContent = 'Jumlah bintang harus angka 0 atau lebih.';
+    msg.className = 'form-msg err';
+    return;
+  }
 
   const btn = document.getElementById('saveSettingsBtn');
   btn.disabled = true;
   btn.textContent = 'Menyimpan...';
   const { error } = await sb.from('question_settings').upsert(rows, { onConflict: 'username,operation' });
+  if(!error){
+    const { error: starErr } = await sb.from('user_settings').upsert(
+      [{ username: settingsTargetUser, star_correct: starCorrect, star_wrong: starWrong }],
+      { onConflict: 'username' }
+    );
+    if(starErr){
+      btn.disabled = false;
+      btn.textContent = 'Simpan Pengaturan';
+      msg.textContent = 'Gagal simpan pengaturan bintang: ' + starErr.message;
+      msg.className = 'form-msg err';
+      return;
+    }
+  }
   btn.disabled = false;
   btn.textContent = 'Simpan Pengaturan';
 
@@ -140,7 +183,7 @@ document.getElementById('saveSettingsBtn').addEventListener('click', async () =>
     msg.className = 'form-msg err';
     return;
   }
-  msg.textContent = 'Tersimpan! Soal otomatis langsung pakai rentang baru ini mulai sekarang.';
+  msg.textContent = 'Tersimpan! Perubahan langsung kepake mulai sekarang.';
   msg.className = 'form-msg ok';
 });
 
