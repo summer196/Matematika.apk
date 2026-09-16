@@ -18,6 +18,14 @@ async function initApp(){
   }
   setupRealtimeSubscriptions();
   window.addEventListener('pagehide', () => { if(state.screen === 'quiz') broadcastQuizCleared(); });
+  document.addEventListener('visibilitychange', () => {
+    // Layar HP kekunci / pindah app terus balik lagi → timer JS sempat "dibekukan"
+    // browser, jadi detak jantung ke admin sempat berhenti. Begitu balik kelihatan,
+    // langsung lapor status sekarang biar gak dianggep udah gak aktif.
+    if(document.visibilityState === 'visible' && state.screen === 'quiz'){
+      broadcastQuizActivity();
+    }
+  });
   render();
 }
 initApp();

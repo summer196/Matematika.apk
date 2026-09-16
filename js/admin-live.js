@@ -8,7 +8,8 @@
 
 const OP_LABEL_LIVE = { tambah:'Tambah', kurang:'Kurang', kali:'Kali', bagi:'Bagi' };
 let liveActivityMap = {}; // username -> {operation, questionText, idx, total, startedAt, lastSeen}
-const LIVE_STALE_MS = 25000; // dianggap "udah gak aktif" kalau 25 detik gak ada update baru
+const LIVE_STALE_MS = 60000; // dianggap "kayaknya udah berhenti" kalau 1 menit gak ada update (kartunya jadi abu-abu, tapi belum dibuang)
+const LIVE_REMOVE_MS = 240000; // baru bener-bener dibuang dari daftar kalau 4 menit gak ada update sama sekali
 
 function setupLiveMonitoring(){
   if(!sb) return;
@@ -34,7 +35,7 @@ function setupLiveMonitoring(){
     const now = Date.now();
     Object.keys(liveActivityMap).forEach(u => {
       const age = now - liveActivityMap[u].lastSeen;
-      if(age > LIVE_STALE_MS * 3){ delete liveActivityMap[u]; changed = true; }
+      if(age > LIVE_REMOVE_MS){ delete liveActivityMap[u]; changed = true; }
     });
     renderLiveActivity();
   }, 5000);
@@ -56,6 +57,7 @@ function renderLiveActivity(){
     const age = now - a.lastSeen;
     const stale = age > LIVE_STALE_MS;
     const secAgo = Math.floor(age / 1000);
+    const ageLabel = secAgo < 60 ? `${secAgo} detik lalu` : `${Math.floor(secAgo/60)} menit lalu`;
     return `
       <div class="live-card">
         <div class="live-dot ${stale ? 'stale':''}"></div>
@@ -66,7 +68,7 @@ function renderLiveActivity(){
             soal <b>${OP_LABEL_LIVE[a.operation] || a.operation}</b> nomor <b>${a.idx + 1}/${a.total}</b>:
             "${escapeHtml(a.questionText || '-')}"
           </div>
-          <div class="live-meta">Update terakhir ${secAgo} detik lalu</div>
+          <div class="live-meta">Update terakhir ${ageLabel}</div>
         </div>
       </div>
     `;

@@ -20,6 +20,12 @@ function setupRealtimeSubscriptions(){
     if(status === 'SUBSCRIBED'){
       liveChannelReady = true;
       if(pendingLiveBroadcast){ liveChannel.send(pendingLiveBroadcast); pendingLiveBroadcast = null; }
+      // Begitu (ter)sambung lagi (termasuk abis putus), langsung lapor status sekarang
+      // kalau lagi di layar kuis — biar gak nunggu detak jantung berikutnya
+      if(state.screen === 'quiz') broadcastQuizActivity();
+    } else {
+      // CLOSED / CHANNEL_ERROR / TIMED_OUT dll — jangan anggap masih siap ngirim
+      liveChannelReady = false;
     }
   });
 
