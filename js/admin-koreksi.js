@@ -6,6 +6,7 @@
 /* ---------------- Koreksi Jawaban (review submissions) ---------------- */
 const OP_LABEL_REVIEW = {tambah:'Tambah', kurang:'Kurang', kali:'Kali', bagi:'Bagi', campur:'Campuran'};
 let reviewFilterUser = 'semua';
+let reviewSortBy = 'date_desc'; // date_desc | date_asc | benar_desc | benar_asc
 
 function formatDateAdmin(iso){
   const d = new Date(iso);
@@ -88,9 +89,18 @@ function renderReview(){
     wrap.innerHTML = `<div class="empty-state">Belum ada jawaban dari "${escapeHtml(reviewFilterUser)}".</div>`;
     return;
   }
-  const sessions = groupBySession(filtered);
+  const sessions = groupBySession(filtered).map(sess => ({
+    ...sess,
+    benarCount: sess.items.filter(i => effectiveStatus(i) === 'benar').length
+  }));
+
+  if(reviewSortBy === 'date_asc') sessions.sort((a,b) => new Date(a.date) - new Date(b.date));
+  else if(reviewSortBy === 'benar_desc') sessions.sort((a,b) => b.benarCount - a.benarCount || new Date(b.date) - new Date(a.date));
+  else if(reviewSortBy === 'benar_asc') sessions.sort((a,b) => a.benarCount - b.benarCount || new Date(b.date) - new Date(a.date));
+  else sessions.sort((a,b) => new Date(b.date) - new Date(a.date)); // date_desc (default)
+
   wrap.innerHTML = sessions.map(sess => {
-    const benarCount = sess.items.filter(i => effectiveStatus(i) === 'benar').length;
+    const benarCount = sess.benarCount;
     const isOpen = !!openSessions[sess.session_id];
     const roundTotalMs = sess.items.find(i => i.round_total_ms != null)?.round_total_ms;
     const itemsHtml = sess.items.map(item => {
@@ -195,6 +205,10 @@ async function saveNote(id){
 document.getElementById('refreshReviewBtn').addEventListener('click', loadSubmissions);
 document.getElementById('reviewUserFilter').addEventListener('change', (e) => {
   reviewFilterUser = e.target.value;
+  renderReview();
+});
+document.getElementById('reviewSortSelect').addEventListener('change', (e) => {
+  reviewSortBy = e.target.value;
   renderReview();
 });
 

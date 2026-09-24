@@ -173,8 +173,19 @@ function resultScreen(){
 }
 
 /* ---------------- Riwayat Soal ---------------- */
+let riwayatSortBy = 'date_desc'; // date_desc | date_asc | benar_desc | benar_asc
+
+function sortHistory(history){
+  const sorted = history.slice();
+  if(riwayatSortBy === 'date_asc') sorted.sort((a,b) => new Date(a.date) - new Date(b.date));
+  else if(riwayatSortBy === 'benar_desc') sorted.sort((a,b) => b.score - a.score || new Date(b.date) - new Date(a.date));
+  else if(riwayatSortBy === 'benar_asc') sorted.sort((a,b) => a.score - b.score || new Date(b.date) - new Date(a.date));
+  else sorted.sort((a,b) => new Date(b.date) - new Date(a.date)); // date_desc (default)
+  return sorted;
+}
+
 function riwayatScreen(){
-  const history = loadHistory();
+  const history = sortHistory(loadHistory());
   let body;
   if(history.length === 0){
     body = `<div class="empty-state">Belum ada riwayat latihan. Mulai latihan pertama kamu.</div>`;
@@ -190,6 +201,16 @@ function riwayatScreen(){
   return `
     <div class="brand"><h1 style="font-size:20px;">Riwayat Soal</h1><div class="stars">${totalStars} Bintang</div></div>
     <div class="subtitle">Seluruh riwayat latihan yang telah kamu selesaikan.</div>
+    ${history.length > 0 ? `
+    <div class="vocab-filters">
+      <select id="riwayatSortSelect">
+        <option value="date_desc" ${riwayatSortBy==='date_desc'?'selected':''}>Tanggal Terbaru</option>
+        <option value="date_asc" ${riwayatSortBy==='date_asc'?'selected':''}>Tanggal Terlama</option>
+        <option value="benar_desc" ${riwayatSortBy==='benar_desc'?'selected':''}>Jumlah Benar Tertinggi</option>
+        <option value="benar_asc" ${riwayatSortBy==='benar_asc'?'selected':''}>Jumlah Benar Terendah</option>
+      </select>
+    </div>
+    ` : ''}
     ${history.length > 0 ? `<button class="check-btn" id="clearHistoryBtn" style="background:rgba(255,107,91,0.18); box-shadow:0 5px 0 rgba(255,107,91,0.3); color:#FF9585; margin-bottom:16px;">Hapus Riwayat dan Bintang</button>` : ''}
     <div class="card">${body}</div>
   `;
@@ -272,6 +293,10 @@ function attachRiwayatHandlers(){
       }
       render();
     });
+  }
+  const sortSel = document.getElementById('riwayatSortSelect');
+  if(sortSel){
+    sortSel.addEventListener('change', () => { riwayatSortBy = sortSel.value; render(); });
   }
 }
 

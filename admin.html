@@ -124,11 +124,22 @@
           <button id="clearAllReviewBtn" class="reset-btn">Hapus Semua Riwayat</button>
         </div>
       </div>
-      <div class="field" style="max-width:280px; margin-bottom:14px;">
-        <label>Tampilkan punya</label>
-        <select id="reviewUserFilter">
-          <option value="semua">Semua Nama</option>
-        </select>
+      <div style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:14px;">
+        <div class="field" style="max-width:280px; margin-bottom:0;">
+          <label>Tampilkan punya</label>
+          <select id="reviewUserFilter">
+            <option value="semua">Semua Nama</option>
+          </select>
+        </div>
+        <div class="field" style="max-width:280px; margin-bottom:0;">
+          <label>Urutkan</label>
+          <select id="reviewSortSelect">
+            <option value="date_desc">Tanggal Terbaru</option>
+            <option value="date_asc">Tanggal Terlama</option>
+            <option value="benar_desc">Jumlah Benar Tertinggi</option>
+            <option value="benar_asc">Jumlah Benar Terendah</option>
+          </select>
+        </div>
       </div>
       <div id="reviewWrap"><div class="loading-line">Memuat jawaban...</div></div>
     </div>
